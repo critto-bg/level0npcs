@@ -1,0 +1,12 @@
+# devenv symlinks
+game
+gametrilogy
+gamebg2
+docs
+dev
+bench
+
+# generic stuff
+level0npcs/backup/
+.DS_Store
+.claude

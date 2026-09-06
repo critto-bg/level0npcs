@@ -1,0 +1,13 @@
+// A joinable's override script raises its XP to a tier the moment it joins.
+// This block, added on top of the script, prevents the process in favor of
+// our own XP helper.
+
+IF
+  Global("BD_JOINXP","LOCALS",0)
+  InParty(Myself)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BD_JOINXP","LOCALS",1)
+    SetInterrupt(TRUE)
+END

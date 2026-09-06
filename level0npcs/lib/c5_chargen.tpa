@@ -1,0 +1,740 @@
+// Class, kit, ability score and thief skill choices for a joinable NPC,
+// and the creature reset.
+
+// Avatar group of each class: the sprite set CharGen gives it.
+OUTER_SPRINT $c5_avatar_group(~MAGE~) ~MAGE~
+OUTER_SPRINT $c5_avatar_group(~FIGHTER~) ~FIGHTER~
+OUTER_SPRINT $c5_avatar_group(~CLERIC~) ~CLERIC~
+OUTER_SPRINT $c5_avatar_group(~THIEF~) ~THIEF~
+OUTER_SPRINT $c5_avatar_group(~BARD~) ~THIEF~
+OUTER_SPRINT $c5_avatar_group(~PALADIN~) ~FIGHTER~
+OUTER_SPRINT $c5_avatar_group(~FIGHTER_MAGE~) ~FIGHTER~
+OUTER_SPRINT $c5_avatar_group(~FIGHTER_CLERIC~) ~FIGHTER~
+OUTER_SPRINT $c5_avatar_group(~FIGHTER_THIEF~) ~FIGHTER~
+OUTER_SPRINT $c5_avatar_group(~FIGHTER_MAGE_THIEF~) ~FIGHTER~
+OUTER_SPRINT $c5_avatar_group(~DRUID~) ~CLERIC~
+OUTER_SPRINT $c5_avatar_group(~RANGER~) ~FIGHTER~
+OUTER_SPRINT $c5_avatar_group(~MAGE_THIEF~) ~THIEF~
+OUTER_SPRINT $c5_avatar_group(~CLERIC_MAGE~) ~CLERIC~
+OUTER_SPRINT $c5_avatar_group(~CLERIC_THIEF~) ~CLERIC~
+OUTER_SPRINT $c5_avatar_group(~FIGHTER_DRUID~) ~FIGHTER~
+OUTER_SPRINT $c5_avatar_group(~FIGHTER_MAGE_CLERIC~) ~FIGHTER~
+OUTER_SPRINT $c5_avatar_group(~CLERIC_RANGER~) ~CLERIC~
+OUTER_SPRINT $c5_avatar_group(~SORCERER~) ~MAGE~
+OUTER_SPRINT $c5_avatar_group(~MONK~) ~MONK~
+OUTER_SPRINT $c5_avatar_group(~SHAMAN~) ~CLERIC~
+
+// CRE offset of each thief skill, in the order of the CharGen screen:
+// Open Locks, Find Traps, Pick Pockets, Move Silently, Hide In Shadows,
+// Detect Illusion, Set Traps. $c5_skill_names(i) holds the names.
+OUTER_SET $c5_skill_offset(~1~) = 0x67
+OUTER_SET $c5_skill_offset(~2~) = 0x69
+OUTER_SET $c5_skill_offset(~3~) = 0x6a
+OUTER_SET $c5_skill_offset(~4~) = 0x68
+OUTER_SET $c5_skill_offset(~5~) = 0x45
+OUTER_SET $c5_skill_offset(~6~) = 0x64
+OUTER_SET $c5_skill_offset(~7~) = 0x65
+
+//
+// Loads kittable, kitlist, haterace and thiefskl, sets $c5_class_names(id)
+// and $c5_skill_names(1..7), and collects the innates the class and kit
+// ability tables grant.
+//
+// Class and skill names come from the tra. Kit names come from kitlist.
+//
+// kittable gives the K_*_* list for the class and each race. Each entry
+// is a kitlist row number, 0 for the true class.
+// haterace lists the racial enemies a ranger can choose.
+// thiefskl gives the skill points of a class or kit.
+//
+// $c5_clab_spells(RESREF) is set for every GA_ entry of the clab*.2da
+// tables.
+//
+DEFINE_ACTION_MACRO c5_load_tables BEGIN
+  ACTION_FOR_EACH c5_table IN ~kittable~ ~kitlist~ ~haterace~ ~thiefskl~ BEGIN
+    LAM c5_load_2da
+  END
+
+  ACTION_IF NOT VARIABLE_IS_SET c5_clab_spells_loaded BEGIN
+    COPY_EXISTING_REGEXP - GLOB ~^clab.*\.2da$~ ~override~
+      REPLACE_EVALUATE CASE_INSENSITIVE ~GA_\([^ %TAB%%LNL%%WNL%]+\)~ BEGIN
+        SPRINT c5_resref ~%MATCH1%~
+        TO_UPPER c5_resref
+        SET $c5_clab_spells(~%c5_resref%~) = 1
+      END ~%MATCH0%~
+
+    // BG1 paladin innates: BG:EE grants spcl211 to spcl213 instead.
+    OUTER_SET $c5_clab_spells(~SPIN109~) = 1   // Lay On Hands
+    OUTER_SET $c5_clab_spells(~SPIN120~) = 1   // Detect Evil
+    OUTER_SET $c5_clab_spells(~SPIN121~) = 1   // Protection From Evil
+    OUTER_SET c5_clab_spells_loaded = 1
+  END
+
+  OUTER_SPRINT $c5_class_names(~1~) @301
+  OUTER_SPRINT $c5_class_names(~2~) @302
+  OUTER_SPRINT $c5_class_names(~3~) @303
+  OUTER_SPRINT $c5_class_names(~4~) @304
+  OUTER_SPRINT $c5_class_names(~5~) @305
+  OUTER_SPRINT $c5_class_names(~6~) @306
+  OUTER_SPRINT $c5_class_names(~7~) @307
+  OUTER_SPRINT $c5_class_names(~8~) @308
+  OUTER_SPRINT $c5_class_names(~9~) @309
+  OUTER_SPRINT $c5_class_names(~10~) @310
+  OUTER_SPRINT $c5_class_names(~11~) @311
+  OUTER_SPRINT $c5_class_names(~12~) @312
+  OUTER_SPRINT $c5_class_names(~13~) @313
+  OUTER_SPRINT $c5_class_names(~14~) @314
+  OUTER_SPRINT $c5_class_names(~15~) @315
+  OUTER_SPRINT $c5_class_names(~16~) @316
+  OUTER_SPRINT $c5_class_names(~17~) @317
+  OUTER_SPRINT $c5_class_names(~18~) @318
+  OUTER_SPRINT $c5_class_names(~19~) @319
+  OUTER_SPRINT $c5_class_names(~20~) @320
+  OUTER_SPRINT $c5_class_names(~21~) @321
+
+  OUTER_SPRINT $c5_skill_names(~1~) @331
+  OUTER_SPRINT $c5_skill_names(~2~) @332
+  OUTER_SPRINT $c5_skill_names(~3~) @333
+  OUTER_SPRINT $c5_skill_names(~4~) @334
+  OUTER_SPRINT $c5_skill_names(~5~) @335
+  OUTER_SPRINT $c5_skill_names(~6~) @336
+  OUTER_SPRINT $c5_skill_names(~7~) @337
+END
+
+//
+// Reads CRE data into variables
+// input: c5_cre (resref without .cre)
+// output:
+//     c5_race
+//     c5_race_label     race.ids symbol
+//     c5_class
+//     c5_class_label    class.ids symbol, the row label in kittable
+//     c5_kit            CRE dword
+//     c5_racial_enemy   race.ids value
+//     c5_current        class, kit and racial enemy as text
+//     c5_str, c5_str_bonus, c5_dex, c5_con, c5_int, c5_wis, c5_cha
+//     c5_scores_text    the scores as text
+//
+DEFINE_ACTION_MACRO c5_read_cre BEGIN
+  COPY_EXISTING - ~%c5_cre%.cre~ ~override~
+    READ_BYTE 0x238 c5_str
+    READ_BYTE 0x239 c5_str_bonus
+    READ_BYTE 0x23a c5_int
+    READ_BYTE 0x23b c5_wis
+    READ_BYTE 0x23c c5_dex
+    READ_BYTE 0x23d c5_con
+    READ_BYTE 0x23e c5_cha
+    READ_BYTE 0x241 c5_racial_enemy
+    READ_LONG 0x244 c5_kit
+    READ_BYTE 0x272 c5_race
+    READ_BYTE 0x273 c5_class
+    LOOKUP_IDS_SYMBOL_OF_INT c5_race_label ~race~ c5_race
+    LOOKUP_IDS_SYMBOL_OF_INT c5_class_label ~class~ c5_class
+
+  LAF c5_scores_text
+    INT_VAR
+      str = c5_str
+      str_bonus = c5_str_bonus
+      dex = c5_dex
+      con = c5_con
+      int = c5_int
+      wis = c5_wis
+      cha = c5_cha
+    RET c5_scores_text = text
+  END
+
+  // Current class and kit as text.
+  OUTER_SPRINT c5_current ~%c5_class_label%~
+  ACTION_IF VARIABLE_IS_SET $c5_class_names(~%c5_class%~) BEGIN
+    OUTER_SPRINT c5_current $c5_class_names(~%c5_class%~)
+  END
+
+  // The CRE stores the kit.ids value with its two words swapped.
+  OUTER_SET c5_kitids = ((c5_kit BAND 0xffff) BLSL 16) BOR ((c5_kit BLSR 16) BAND 0xffff)
+  ACTION_IF (c5_kitids != 0) AND (c5_kitids != 0x4000) BEGIN
+    LAF c5_lookup_name INT_VAR key = c5_kitids STR_VAR table = ~kitlist~ key_col = ~KITIDS~ name_col = ~MIXED~ RET c5_current_kit = name c5_kit_found = found END
+    ACTION_IF c5_kit_found BEGIN
+      OUTER_SPRINT c5_current ~%c5_current% (%c5_current_kit%)~
+    END
+  END
+
+  // A ranger's racial enemy.
+  ACTION_IF (c5_class = IDS_OF_SYMBOL (~class~ ~RANGER~)) OR (c5_class = IDS_OF_SYMBOL (~class~ ~CLERIC_RANGER~)) BEGIN
+    LAF c5_lookup_name INT_VAR key = c5_racial_enemy STR_VAR table = ~haterace~ key_col = ~IDS~ name_col = ~STRREF~ RET c5_enemy_name = name c5_enemy_found = found END
+    ACTION_IF c5_enemy_found BEGIN
+      OUTER_SPRINT c5_class_kit ~%c5_current%~
+      OUTER_SPRINT c5_current @208
+    END
+  END
+END
+
+//
+// Renders the class menu, the kit menu, the ability score prompt, for a
+// ranger the racial enemy menu and, for a thief, the skill menu.
+//
+// 0 at the class menu aborts the component. 0 at a later menu goes back
+// one menu. c5_step is the menu to show next: 1 class, 2 kit, 3 scores,
+// 4 enemy, 5 skills.
+//
+DEFINE_ACTION_MACRO c5_choose BEGIN
+  OUTER_SET c5_step = 1
+  OUTER_WHILE (c5_step < 6) BEGIN
+
+    // Class selection
+    ACTION_IF (c5_step = 1) BEGIN
+      LAF c5_class_options RET c5_option_count = count RET_ARRAY c5_option c5_option_name c5_option_label END
+      LAF c5_fill_menu INT_VAR count = c5_option_count RET_ARRAY c5_menu_item END
+
+      OUTER_SPRINT c5_prompt @201
+      LAF c5_menu INT_VAR count = c5_option_count allow_zero = 1 STR_VAR prompt = EVAL ~%c5_prompt%~ RET c5_choice = choice END
+      ACTION_IF (c5_choice = 0) BEGIN
+        ABORT @205
+      END
+
+      OUTER_SET c5_chosen_class = $c5_option(~%c5_choice%~)
+      OUTER_SPRINT c5_chosen_class_label $c5_option_label(~%c5_choice%~)
+      OUTER_SPRINT c5_class_name $c5_class_names(~%c5_chosen_class%~)
+      OUTER_SET c5_chosen_ranger =
+        (c5_chosen_class = IDS_OF_SYMBOL (~class~ ~RANGER~)) OR
+        (c5_chosen_class = IDS_OF_SYMBOL (~class~ ~CLERIC_RANGER~))
+      OUTER_SET c5_step = 2
+    END
+
+    // Kit selection
+    ACTION_IF (c5_step = 2) BEGIN
+      LAF c5_kit_options
+        STR_VAR class_label = EVAL ~%c5_chosen_class_label%~
+        RET c5_option_count = count
+        RET_ARRAY c5_option c5_option_name c5_option_label c5_option_kitids
+      END
+      LAF c5_fill_menu INT_VAR count = c5_option_count RET_ARRAY c5_menu_item END
+
+      OUTER_SPRINT c5_prompt @202
+      LAF c5_menu INT_VAR count = c5_option_count allow_zero = 1 STR_VAR prompt = EVAL ~%c5_prompt%~ RET c5_choice = choice END
+      ACTION_IF (c5_choice = 0) BEGIN
+        OUTER_SET c5_step = 1
+      END ELSE BEGIN
+        OUTER_SET c5_chosen_kit = $c5_option(~%c5_choice%~)
+        OUTER_SPRINT c5_chosen_kit_label $c5_option_label(~%c5_choice%~)
+        OUTER_SET c5_chosen_kitids = $c5_option_kitids(~%c5_choice%~)
+        OUTER_SPRINT c5_chosen_text $c5_option_name(~%c5_choice%~)
+
+        // The engine shows a gnome multi-class with a mage part as
+        // an illusionist. Write the kit, so the spellbook follows it.
+        ACTION_IF (c5_race = IDS_OF_SYMBOL (~race~ ~GNOME~)) AND (c5_chosen_kitids = 0x4000) BEGIN
+          ACTION_MATCH ~%c5_chosen_class_label%~ WITH
+            ~FIGHTER_MAGE~ ~MAGE_THIEF~ ~CLERIC_MAGE~ ~FIGHTER_MAGE_THIEF~ ~FIGHTER_MAGE_CLERIC~ BEGIN
+              OUTER_SET c5_chosen_kitids = IDS_OF_SYMBOL (~kit~ ~MAGESCHOOL_ILLUSIONIST~)
+              LAF c5_lookup_name INT_VAR key = c5_chosen_kitids STR_VAR table = ~kitlist~ key_col = ~KITIDS~ name_col = ~MIXED~ RET c5_kit_name = name END
+              OUTER_SPRINT c5_chosen_text ~%c5_class_name% (%c5_kit_name%)~
+            END
+            DEFAULT
+          END
+        END
+
+        OUTER_SET c5_chosen_enemy = 255 // NO_RACE
+        OUTER_SET c5_step = 3
+      END
+    END
+
+    // Ability scores
+    ACTION_IF (c5_step = 3) BEGIN
+      LAF c5_score_prompt
+        STR_VAR class_label = EVAL ~%c5_chosen_class_label%~
+        RET
+          c5_choice = choice
+          c5_chosen_str = str
+          c5_chosen_str_bonus = str_bonus
+          c5_chosen_dex = dex
+          c5_chosen_con = con
+          c5_chosen_int = int
+          c5_chosen_wis = wis
+          c5_chosen_cha = cha
+      END
+
+      OUTER_SET c5_chosen_scores = 0
+      ACTION_IF (c5_choice = 0) BEGIN
+        OUTER_SET c5_step = 2
+      END ELSE BEGIN
+        ACTION_IF (c5_choice = 2) BEGIN
+          OUTER_SET c5_chosen_scores = 1
+          LAF c5_scores_text
+            INT_VAR
+              str = c5_chosen_str
+              str_bonus = c5_chosen_str_bonus
+              dex = c5_chosen_dex
+              con = c5_chosen_con
+              int = c5_chosen_int
+              wis = c5_chosen_wis
+              cha = c5_chosen_cha
+            RET c5_chosen_scores_text = text
+          END
+        END
+
+        OUTER_SET c5_step = (c5_chosen_ranger ? 4 : 5)
+      END
+    END
+
+    // Racial enemy selection
+    ACTION_IF (c5_step = 4) BEGIN
+      LAF c5_enemy_options RET c5_option_count = count RET_ARRAY c5_option c5_option_name END
+      LAF c5_fill_menu INT_VAR count = c5_option_count RET_ARRAY c5_menu_item END
+
+      OUTER_SPRINT c5_prompt @207
+      LAF c5_menu INT_VAR count = c5_option_count allow_zero = 1 STR_VAR prompt = EVAL ~%c5_prompt%~ RET c5_choice = choice END
+      ACTION_IF (c5_choice = 0) BEGIN
+        OUTER_SET c5_step = 3
+      END ELSE BEGIN
+        OUTER_SET c5_chosen_enemy = $c5_option(~%c5_choice%~)
+        OUTER_SPRINT c5_enemy_name $c5_option_name(~%c5_choice%~)
+        OUTER_SPRINT c5_class_kit ~%c5_chosen_text%~
+        OUTER_SPRINT c5_chosen_text @208
+        OUTER_SET c5_step = 5
+      END
+    END
+
+    // Thief skills
+    ACTION_IF (c5_step = 5) BEGIN
+      LAF c5_thiefskl_points
+        STR_VAR
+          class_label = EVAL ~%c5_chosen_class_label%~
+          kit_label = EVAL ~%c5_chosen_kit_label%~
+        RET c5_skill_points = points c5_skill_level_points = level_points
+      END
+
+      OUTER_SET c5_chosen_skills = 0
+      OUTER_SET c5_step = 6
+      ACTION_IF (c5_skill_points > 0) BEGIN
+        LAF c5_skill_prompt INT_VAR points = c5_skill_points RET c5_choice = choice RET_ARRAY c5_skill END
+        ACTION_IF (c5_choice = 0) BEGIN
+          OUTER_SET c5_step = (c5_chosen_ranger ? 4 : 3)
+        END ELSE BEGIN
+          OUTER_SET c5_chosen_skills = 1
+          LAF c5_skills_text RET c5_chosen_skills_text = text END
+        END
+      END
+    END
+  END
+END
+
+//
+// The thief skill points to place at install: START_POINTS less
+// LEVEL_POINTS of the thiefskl row of the kit, else of the class.
+// CharGen gives START_POINTS, the level-up from 0 gives LEVEL_POINTS.
+// No row, or no gap, gives 0.
+//
+// Output:
+//     points         the points to place
+//     level_points   LEVEL_POINTS of the row, 0 without a row
+//
+DEFINE_ACTION_FUNCTION c5_thiefskl_points
+  STR_VAR class_label = ~~ kit_label = ~~
+  RET points level_points
+BEGIN
+  OUTER_SET points = 0
+  OUTER_SET level_points = 0
+  OUTER_SPRINT row ~%kit_label%~
+  LAF c5_lookup_cell STR_VAR table = ~thiefskl~ row = EVAL ~%row%~ col = ~START_POINTS~ RET start_points = value found END
+  ACTION_IF NOT found BEGIN
+    OUTER_SPRINT row ~%class_label%~
+    LAF c5_lookup_cell STR_VAR table = ~thiefskl~ row = EVAL ~%row%~ col = ~START_POINTS~ RET start_points = value found END
+  END
+
+  ACTION_IF found BEGIN
+    LAF c5_lookup_cell STR_VAR table = ~thiefskl~ row = EVAL ~%row%~ col = ~LEVEL_POINTS~ RET level_points = value END
+    ACTION_IF IS_AN_INT ~start_points~ AND IS_AN_INT ~level_points~ AND (start_points > level_points) BEGIN
+      OUTER_SET points = start_points - level_points
+    END
+  END
+END
+
+//
+// The placed thief skill points as text, skills with points only.
+// Input: $c5_skill(1..7), the points per skill in menu order.
+//
+DEFINE_ACTION_FUNCTION c5_skills_text
+  RET text
+BEGIN
+  OUTER_SPRINT text ~~
+  OUTER_FOR (i = 1; i <= 7; i += 1) BEGIN
+    OUTER_SET c5_skill_value = $c5_skill(~%i%~)
+    ACTION_IF (c5_skill_value > 0) BEGIN
+      OUTER_SPRINT c5_skill_name $c5_skill_names(~%i%~)
+      OUTER_SPRINT item @216
+      ACTION_IF (~%text%~ STR_EQ ~~) BEGIN
+        OUTER_SPRINT text ~%item%~
+      END ELSE BEGIN
+        OUTER_SPRINT text ~%text%, %item%~
+      END
+    END
+  END
+END
+
+//
+// Lists the 21 classes, numbered from 1.
+// Output:
+//     count
+//     $c5_option(n)         class id
+//     $c5_option_name(n)    display name
+//     $c5_option_label(n)   class.ids symbol, the row label in kittable
+//
+DEFINE_ACTION_FUNCTION c5_class_options
+  RET count
+  RET_ARRAY c5_option c5_option_name c5_option_label
+BEGIN
+  OUTER_SET count = 0
+  OUTER_FOR (class_id = 1; class_id <= 21; class_id += 1) BEGIN
+    OUTER_PATCH ~~ BEGIN
+      LOOKUP_IDS_SYMBOL_OF_INT label ~class~ class_id
+    END
+
+    ACTION_IF NOT IS_AN_INT ~label~ BEGIN
+      OUTER_SET count += 1
+      OUTER_SET $c5_option(~%count%~) = class_id
+      OUTER_SPRINT $c5_option_name(~%count%~) $c5_class_names(~%class_id%~)
+      OUTER_SPRINT $c5_option_label(~%count%~) ~%label%~
+    END
+  END
+END
+
+//
+// Lists the kits of the class: the true class first, then the kitlist
+// rows of the class that any K_*_* list of its kittable row names, in
+// kitlist order. Allows every kit for every race. A multi-class gets
+// the true class only.
+//
+// Output:
+//     count
+//     $c5_option(n)         kitlist row number, 0 for the true class
+//     $c5_option_name(n)    display name
+//     $c5_option_label(n)   kitlist ROWNAME
+//     $c5_option_kitids(n)  kit.ids value, 0x4000 for the true class
+//
+DEFINE_ACTION_FUNCTION c5_kit_options
+  STR_VAR class_label = ~~
+  RET count
+  RET_ARRAY c5_option c5_option_name c5_option_label c5_option_kitids
+BEGIN
+  // True class
+  OUTER_SET count = 1
+  OUTER_SET $c5_option(~1~) = 0
+  OUTER_SPRINT $c5_option_name(~1~) @203
+  OUTER_SPRINT $c5_option_label(~1~) ~%class_label%~
+  OUTER_SET $c5_option_kitids(~1~) = 0x4000
+
+  // Load the kitlist rows some race's list names
+  ACTION_CLEAR_ARRAY named
+  OUTER_SET race_count = $c5_tables(~kittable~ ~_cols~)
+  OUTER_FOR (i = 0; i < race_count; i += 1) BEGIN
+    OUTER_SPRINT race $c5_tables(~kittable~ ~_col~ ~%i%~)
+    LAF c5_lookup_cell STR_VAR table = ~kittable~ row = EVAL ~%class_label%~ col = EVAL ~%race%~ RET kit_table = value found END
+
+    ACTION_IF found AND NOT (~%kit_table%~ STR_EQ ~*~) BEGIN
+      LAF c5_load_list STR_VAR table = EVAL ~%kit_table%~ RET list_count = count RET_ARRAY c5_list END
+      OUTER_FOR (j = 0; j < list_count; j += 1) BEGIN
+        OUTER_SPRINT kit_row $c5_list(~%j%~)
+        OUTER_SET $named(~%kit_row%~) = 1
+      END
+    END
+  END
+
+  OUTER_SET class_id = IDS_OF_SYMBOL (~class~ ~%class_label%~)
+  OUTER_SET rows = $c5_tables(~kitlist~ ~_rows~)
+  OUTER_FOR (i = 0; i < rows; i += 1) BEGIN
+    OUTER_SPRINT kit_row $c5_tables(~kitlist~ ~_label~ ~%i%~)
+    LAF c5_lookup_cell STR_VAR table = ~kitlist~ row = EVAL ~%kit_row%~ col = ~CLASS~ RET kit_class = value END
+    ACTION_IF VARIABLE_IS_SET $named(~%kit_row%~) AND IS_AN_INT ~kit_class~ BEGIN
+      ACTION_IF (kit_class = class_id) BEGIN
+        LAF c5_lookup_cell STR_VAR table = ~kitlist~ row = EVAL ~%kit_row%~ col = ~ROWNAME~ RET label = value END
+        LAF c5_lookup_cell STR_VAR table = ~kitlist~ row = EVAL ~%kit_row%~ col = ~KITIDS~ RET kitids = value END
+        LAF c5_lookup_cell STR_VAR table = ~kitlist~ row = EVAL ~%kit_row%~ col = ~MIXED~ RET strref = value END
+        OUTER_SPRINT name ~%label%~
+        ACTION_IF IS_AN_INT ~strref~ BEGIN
+          ACTION_IF (strref >= 0) BEGIN
+            OUTER_PATCH ~~ BEGIN
+              GET_STRREF strref name
+            END
+          END
+        END
+
+        OUTER_SET count += 1
+        OUTER_SET $c5_option(~%count%~) = kit_row
+        OUTER_SPRINT $c5_option_name(~%count%~) ~%name%~
+        OUTER_SPRINT $c5_option_label(~%count%~) ~%label%~
+        OUTER_SET $c5_option_kitids(~%count%~) = kitids
+      END
+    END
+  END
+END
+
+//
+// Lists the racial enemies of haterace.2da in table order, numbered from 1.
+// Output:
+//     count
+//     $c5_option(n)         race.ids value
+//     $c5_option_name(n)    display name
+//
+DEFINE_ACTION_FUNCTION c5_enemy_options
+  RET count
+  RET_ARRAY c5_option c5_option_name
+BEGIN
+  OUTER_SET count = 0
+  OUTER_SET rows = $c5_tables(~haterace~ ~_rows~)
+
+  OUTER_FOR (i = 0; i < rows; i += 1) BEGIN
+    OUTER_SPRINT row_label $c5_tables(~haterace~ ~_label~ ~%i%~)
+    LAF c5_lookup_cell STR_VAR table = ~haterace~ row = EVAL ~%row_label%~ col = ~IDS~ RET race = value END
+
+    ACTION_IF IS_AN_INT ~race~ BEGIN
+      OUTER_SPRINT name ~%row_label%~
+      LAF c5_lookup_cell STR_VAR table = ~haterace~ row = EVAL ~%row_label%~ col = ~STRREF~ RET strref = value END
+
+      ACTION_IF IS_AN_INT ~strref~ BEGIN
+        ACTION_IF (strref >= 0) BEGIN
+          OUTER_PATCH ~~ BEGIN
+            GET_STRREF strref name
+          END
+        END
+      END
+
+      OUTER_SET count += 1
+      OUTER_SET $c5_option(~%count%~) = race
+      OUTER_SPRINT $c5_option_name(~%count%~) ~%name%~
+    END
+  END
+END
+
+//
+// Returns the scores as text, STR 18/93 for exceptional strength.
+// Input:
+//     str, str_bonus, dex, con, int, wis, cha
+// Output:
+//     text
+//
+DEFINE_ACTION_FUNCTION c5_scores_text
+  INT_VAR str = 0 str_bonus = 0 dex = 0 con = 0 int = 0 wis = 0 cha = 0
+  RET text
+BEGIN
+  OUTER_SPRINT c5_score_str ~%str%~
+  ACTION_IF (str = 18) AND (str_bonus > 0) BEGIN
+    OUTER_SPRINT c5_score_str ~%str%/%str_bonus%~
+    ACTION_IF (str_bonus < 10) BEGIN
+      OUTER_SPRINT c5_score_str ~%str%/0%str_bonus%~
+    END
+    ACTION_IF (str_bonus = 100) BEGIN
+      OUTER_SPRINT c5_score_str ~%str%/00~
+    END
+  END
+
+  OUTER_SET c5_score_dex = dex
+  OUTER_SET c5_score_con = con
+  OUTER_SET c5_score_int = int
+  OUTER_SET c5_score_wis = wis
+  OUTER_SET c5_score_cha = cha
+  OUTER_SPRINT text @213
+END
+
+//
+// Gives a creature the avatar CharGen gives its class: the animate.ids
+// entry of the class group with the gender and race of the current
+// avatar's entry. A monk takes the human entry. Writes only
+// when the current avatar is such an entry and the new one exists.
+// Input:
+//     class_id   class.ids value
+// Returns:
+//     avatar     the animate.ids name of the class avatar, ~~ when there is none
+//
+DEFINE_PATCH_FUNCTION c5_write_avatar
+  INT_VAR class_id = 0
+  RET avatar
+BEGIN
+  SPRINT avatar ~~
+  READ_LONG 0x28 animation
+  LOOKUP_IDS_SYMBOL_OF_INT class_label ~class~ class_id
+  LOOKUP_IDS_SYMBOL_OF_INT current ~animate~ animation
+
+  PATCH_IF VARIABLE_IS_SET $c5_avatar_group(~%class_label%~) AND (~%current%~ STRING_MATCHES_REGEXP ~[A-Z]+_\(MALE\|FEMALE\)_[A-Z_0-9]+~ = 0) BEGIN
+    SPRINT group $c5_avatar_group(~%class_label%~)
+    INNER_PATCH_SAVE gender_race ~%current%~ BEGIN
+      REPLACE_TEXTUALLY ~^[A-Z]+_~ ~~           // GENDER_RACE and the suffix
+    END
+    INNER_PATCH_SAVE gender ~%gender_race%~ BEGIN
+      REPLACE_TEXTUALLY ~_.*$~ ~~
+    END
+
+    PATCH_IF (~%group%~ STR_EQ ~MONK~) BEGIN
+      SPRINT label ~MONK_%gender%_HUMAN~
+    END ELSE BEGIN
+      SPRINT label ~%group%_%gender_race%~
+    END
+
+    SET ids_value = IDS_OF_SYMBOL (~animate~ ~%label%~)
+    PATCH_IF (ids_value >= 0) BEGIN
+      SPRINT avatar ~%label%~
+      WRITE_LONG 0x28 ids_value
+    END
+  END
+END
+
+//
+// Resets a creature so the engine rebuilds it at the first level-up.
+// Input:
+//     class_id       class.ids value
+//     kitids         kit.ids value, 0x4000 for the true class
+//     racial_enemy   race.ids value, 255 (NO_RACE) for none
+//
+// Sets levels 0, XP 0, HP 1/1, AC 10, THAC0 20, 1 attack, saves 20,
+// thief skills, lore, turn undead and tracking 0, racial enemy as
+// given, the avatar of the class. Keeps the resistances, clears the
+// original-class and fallen flags.
+//
+// Removes the wizard and priest spells and zeroes their memorization slots.
+// Keeps the innates, except those a class or kit ability table grants:
+// the level-up grants them again. The innate slots become the count of
+// kept innates.
+// Drops the proficiency effects (opcode 233).
+// Returns:
+//     avatar         the animate.ids name of the class avatar, ~~ when there is none
+//
+DEFINE_PATCH_FUNCTION c5_reset_cre
+  INT_VAR class_id = 0 kitids = 0x4000 racial_enemy = 255
+  RET avatar
+BEGIN
+  READ_LONG 0x10 flags
+  WRITE_LONG 0x10 (flags BAND (BNOT 0x7f8))   // bits 3 to 10: original class, fallen paladin, fallen ranger
+  WRITE_LONG 0x18 0                           // XP
+  WRITE_SHORT 0x24 1                          // current HP
+  WRITE_SHORT 0x26 1                          // max HP
+  WRITE_BYTE 0x45 0                           // hide in shadows
+  WRITE_SHORT 0x46 10                         // AC natural
+  WRITE_SHORT 0x48 10                         // AC effective
+
+  PATCH_FOR_EACH offset IN 0x4a 0x4c 0x4e 0x50 BEGIN  // AC modifiers: crushing, missile, piercing, slashing
+    WRITE_SHORT offset 0
+  END
+
+  WRITE_BYTE 0x52 20                          // THAC0
+  WRITE_BYTE 0x53 1                           // attacks
+
+  FOR (offset = 0x54; offset <= 0x58; offset += 1) BEGIN  // saves: death, wands, polymorph, breath, spells
+    WRITE_BYTE offset 20
+  END
+
+  FOR (offset = 0x64; offset <= 0x6a; offset += 1) BEGIN  // thief skills and lore
+    WRITE_BYTE offset 0
+  END
+
+  WRITE_BYTE 0x82 0                           // turn undead level
+  WRITE_BYTE 0x83 0                           // tracking
+  WRITE_BYTE 0x234 0                          // level, first class
+  WRITE_BYTE 0x235 0                          // level, second class
+  WRITE_BYTE 0x236 0                          // level, third class
+  WRITE_BYTE 0x241 racial_enemy               // racial enemy, race.ids value
+
+  WRITE_LONG 0x244 (((kitids BAND 0xffff) BLSL 16) BOR ((kitids BLSR 16) BAND 0xffff))  // kit, words swapped
+  WRITE_BYTE 0x273 class_id
+
+  LPF c5_write_avatar INT_VAR class_id = class_id RET avatar END
+
+  // Spells: list what goes, then remove it from both spell lists. The
+  // memorized list gets its own walk (Dorn's files memorize his innates
+  // without knowing them.)
+  READ_LONG 0x2a0 known_offset
+  READ_LONG 0x2a4 known_count
+  READ_LONG 0x2a8 info_offset
+  READ_LONG 0x2ac info_count
+  READ_LONG 0x2b0 memorized_offset
+  SET drop_count = 0
+
+  FOR (i = 0; i < known_count; i += 1) BEGIN
+    SET entry = known_offset + i * 0xc
+    READ_ASCII entry resref (8) NULL
+    READ_SHORT (entry + 0xa) spell_type       // 0 priest, 1 wizard, 2 innate
+    TO_UPPER resref
+    PATCH_IF ((spell_type != 2) OR VARIABLE_IS_SET $c5_clab_spells(~%resref%~)) AND NOT VARIABLE_IS_SET $dropping(~%resref%~) BEGIN
+      SPRINT $drop(~%drop_count%~) ~%resref%~
+      SET $dropping(~%resref%~) = 1
+      SET drop_count += 1
+    END
+  END
+
+  FOR (i = 0; i < info_count; i += 1) BEGIN
+    SET entry = info_offset + i * 0x10
+    READ_SHORT (entry + 0x6) spell_type
+    READ_LONG (entry + 0x8) first             // index of the first memorized spell
+    READ_LONG (entry + 0xc) memorized_count
+    FOR (j = first; j < (first + memorized_count); j += 1) BEGIN
+      READ_ASCII (memorized_offset + j * 0xc) resref (8) NULL
+      TO_UPPER resref
+      PATCH_IF ((spell_type != 2) OR VARIABLE_IS_SET $c5_clab_spells(~%resref%~)) AND NOT VARIABLE_IS_SET $dropping(~%resref%~) BEGIN
+        SPRINT $drop(~%drop_count%~) ~%resref%~
+        SET $dropping(~%resref%~) = 1
+        SET drop_count += 1
+      END
+    END
+  END
+
+  FOR (i = 0; i < drop_count; i += 1) BEGIN
+    SPRINT resref $drop(~%i%~)
+    REMOVE_MEMORIZED_SPELL ~%resref%~
+    REMOVE_KNOWN_SPELL ~%resref%~
+  END
+
+  READ_LONG 0x2a8 info_offset
+  READ_LONG 0x2ac info_count
+  PATCH_IF (info_count != 17) BEGIN
+    PATCH_PRINT ~%SOURCE_FILE% has %info_count% spell memorization entries, not 17.~
+  END
+
+  FOR (i = 0; i < info_count; i += 1) BEGIN
+    SET entry = info_offset + i * 0x10
+    READ_SHORT (entry + 0x6) spell_type
+    PATCH_IF (spell_type = 2) BEGIN
+      READ_LONG (entry + 0xc) kept            // memorized innates
+      WRITE_SHORT (entry + 0x2) kept          // memorizable
+      WRITE_SHORT (entry + 0x4) kept          // memorizable after effects
+    END ELSE BEGIN
+      WRITE_SHORT (entry + 0x2) 0             // memorizable
+      WRITE_SHORT (entry + 0x4) 0             // memorizable after effects
+      WRITE_LONG (entry + 0x8) 0              // first memorized spell
+      WRITE_LONG (entry + 0xc) 0              // memorized count
+    END
+  END
+
+  // Proficiencies
+  LPF DELETE_EFFECT INT_VAR match_opcode = 233 END
+
+  // Give a ranger the two Two-Weapon Style points
+  PATCH_IF (class_id = IDS_OF_SYMBOL (~class~ ~RANGER~)) OR (class_id = IDS_OF_SYMBOL (~class~ ~CLERIC_RANGER~)) BEGIN
+    LPF ADD_CRE_EFFECT
+      INT_VAR opcode = 233 timing = 9 parameter1 = 2 parameter2 = IDS_OF_SYMBOL (~stats~ ~PROFICIENCY2WEAPON~)
+    END
+  END
+END
+
+//
+// Writes the six ability scores and the exceptional strength.
+// Input:
+//     str, str_bonus, dex, con, int, wis, cha
+//
+DEFINE_PATCH_FUNCTION c5_write_scores
+  INT_VAR str = 0 str_bonus = 0 dex = 0 con = 0 int = 0 wis = 0 cha = 0
+BEGIN
+  WRITE_BYTE 0x238 str
+  WRITE_BYTE 0x239 str_bonus
+  WRITE_BYTE 0x23a int
+  WRITE_BYTE 0x23b wis
+  WRITE_BYTE 0x23c dex
+  WRITE_BYTE 0x23d con
+  WRITE_BYTE 0x23e cha
+END
+
+//
+// Writes the placed thief skill points.
+// Input: $c5_skill(1..7), the points per skill in menu order.
+//
+DEFINE_PATCH_FUNCTION c5_write_skills BEGIN
+  FOR (i = 1; i <= 7; i += 1) BEGIN
+    WRITE_BYTE $c5_skill_offset(~%i%~) $c5_skill(~%i%~)
+  END
+END

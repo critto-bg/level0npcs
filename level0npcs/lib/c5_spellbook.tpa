@@ -1,0 +1,245 @@
+// The spellbook of a caster that starts at level 0.
+
+// Wizard picks per spell level, in order of preference. The first spell of
+// each school in a list is the specialist's pick. Schools as mschool.2da
+// numbers them: 1 abjuration, 2 conjuration, 3 divination, 4 enchantment,
+// 5 illusion, 6 evocation, 7 necromancy, 8 alteration. Levels 1 to 3 have
+// every school.
+OUTER_SPRINT $c5_wizard_list(~1~) ~spwi112 spwi102 spwi116 spwi106 spwi118 spwi105 spwi113 spwi110 spwi117 spwi114 spwi104 spwi101 spwi103 spwi120 spwi119 spwi108 spwi111~
+OUTER_SPRINT $c5_wizard_list(~2~) ~spwi212 spwi211 spwi215 spwi201 spwi205 spwi213 spwi210 spwi209 spwi207 spwi203 spwi206 spwi214 spwi217 spwi218 spwi221 spwi224 spwi208~
+OUTER_SPRINT $c5_wizard_list(~3~) ~spwi304 spwi305 spwi313 spwi312 spwi311 spwi303 spwi306 spwi308 spwi318 spwi326 spwi307 spwi309 spwi314 spwi316 spwi301 spwi322 spwi325~
+OUTER_SPRINT $c5_wizard_list(~4~) ~spwi408 spwi406 spwi405 spwi412 spwi401 spwi404 spwi411 spwi414 spwi403 spwi407 spwi419 spwi420 spwi423 spwi409 spwi424 spwi413~
+OUTER_SPRINT $c5_wizard_list(~5~) ~spwi513 spwi510 spwi502 spwi508 spwi507 spwi501 spwi514 spwi503 spwi505 spwi511 spwi523 spwi504 spwi515 spwi516 spwi506~
+OUTER_SPRINT $c5_wizard_list(~6~) ~spwi609 spwi611 spwi615 spwi605 spwi613 spwi607 spwi617 spwi602 spwi618 spwi608 spwi614 spwi603 spwi601 spwi612 spwi604~
+OUTER_SPRINT $c5_wizard_list(~7~) ~spwi710 spwi713 spwi708 spwi701 spwi705 spwi704 spwi703 spwi712 spwi716 spwi715 spwi702 spwi721 spwi714 spwi720 spwi711~
+OUTER_SPRINT $c5_wizard_list(~8~) ~spwi809 spwi812 spwi805 spwi808 spwi803 spwi804 spwi810 spwi813 spwi815 spwi818 spwi816 spwi807~
+OUTER_SPRINT $c5_wizard_list(~9~) ~spwi909 spwi903 spwi907 spwi908 spwi902 spwi913 spwi910 spwi911 spwi905 spwi912 spwi915 spwi916 spwi918 spwi914~
+
+// The wild mage's own spells: Nahal's Reckless Dweomer, Chaos Shield,
+// Improved Chaos Shield.
+OUTER_SPRINT c5_wild_list ~spwi124 spwi222 spwi723~
+
+//
+// Loads xplevel, mxsplwiz and mxsplbrd, splits the lists above into
+// $c5_wizard_picks(level i) with $c5_wizard_picks_count(level) and
+// $c5_wild_spells(i) with c5_wild_spells_count. Reads every listed
+// spell into $c5_spell_level(resref), $c5_spell_school(resref) and
+// $c5_spell_exclusion(resref), resrefs upper-cased. A spell that is not
+// in the game, or that hidespl.2da hides or removes, is left out. Loaded
+// once per run.
+//
+DEFINE_ACTION_MACRO c5_load_spells BEGIN
+  ACTION_IF NOT VARIABLE_IS_SET c5_spells_loaded BEGIN
+    ACTION_FOR_EACH c5_table IN ~xplevel~ ~mxsplwiz~ ~mxsplbrd~ BEGIN
+      LAM c5_load_2da
+    END
+
+    ACTION_IF FILE_EXISTS_IN_GAME ~hidespl.2da~ BEGIN
+      OUTER_SPRINT c5_table ~hidespl~
+      LAM c5_load_2da
+    END
+
+    // Run through the list of spells for every level defined above
+    OUTER_FOR (c5_level = 0; c5_level <= 9; c5_level += 1) BEGIN
+      ACTION_IF (c5_level = 0) BEGIN
+        OUTER_SPRINT c5_text ~%c5_wild_list%~
+      END ELSE BEGIN
+        OUTER_SPRINT c5_text $c5_wizard_list(~%c5_level%~)
+      END
+
+      OUTER_SET c5_count = 0
+      OUTER_PATCH ~%c5_text%~ BEGIN
+        // Run through every spell on the list in sequence
+        REPLACE_EVALUATE ~\([^ %TAB%%LNL%%WNL%]+\)~ BEGIN
+          SPRINT c5_resref ~%MATCH1%~
+          TO_UPPER c5_resref
+          SET c5_listed = FILE_EXISTS_IN_GAME ~%c5_resref%.spl~
+
+          PATCH_FOR_EACH c5_col IN ~IS_HIDDEN~ ~IS_REMOVED~ BEGIN
+            LPF c5_lookup_cell STR_VAR table = ~hidespl~ row = EVAL ~%c5_resref%~ col = EVAL ~%c5_col%~ RET c5_flag = value END
+            PATCH_IF (~%c5_flag%~ STR_EQ ~1~) BEGIN
+              SET c5_listed = 0
+            END
+          END
+
+          PATCH_IF c5_listed BEGIN
+            INNER_ACTION BEGIN
+              COPY_EXISTING - ~%c5_resref%.spl~ ~override~
+                READ_LONG 0x1e c5_read_exclusion
+                READ_BYTE 0x25 c5_read_school
+                READ_LONG 0x34 c5_read_level
+            END
+
+            SET $c5_spell_exclusion(~%c5_resref%~) = c5_read_exclusion
+            SET $c5_spell_school(~%c5_resref%~) = c5_read_school
+            SET $c5_spell_level(~%c5_resref%~) = c5_read_level
+
+            PATCH_IF (c5_level = 0) BEGIN
+              SPRINT $c5_wild_spells(~%c5_count%~) ~%c5_resref%~
+            END ELSE BEGIN
+              SPRINT $c5_wizard_picks(~%c5_level%~ ~%c5_count%~) ~%c5_resref%~
+            END
+            SET c5_count += 1
+          END
+        END ~~
+      END
+
+      ACTION_IF (c5_level = 0) BEGIN
+        OUTER_SET c5_wild_spells_count = c5_count
+      END ELSE BEGIN
+        OUTER_SET $c5_wizard_picks_count(~%c5_level%~) = c5_count
+      END
+    END
+
+    OUTER_SET c5_spells_loaded = 1
+  END
+END
+
+//
+// Fills the spellbook of a creature reset to level 0.
+// Input:
+//     xp         the XP of the file before the reset
+//     class_id   class.ids value
+//     kitids     kit.ids value, 0x4000 for the true class
+//
+// An arcane caster knows two picks per wizard spell level the XP unlocks,
+// spell level 1 always. A specialist knows one more of its school per
+// level. A wild mage also knows its own three spells.
+//
+// The caster level is the one xplevel.2da gives for the class's share of the XP:
+// half for a double class, a third for a triple class. The spell levels a caster
+// level unlocks come from mxsplwiz.2da, mxsplbrd.2da for a bard. A spell
+// the kit cannot learn is skipped.
+//
+// A priest gets Cure Light Wounds memorized.
+//
+DEFINE_PATCH_FUNCTION c5_fill_spellbook
+  INT_VAR xp = 0 class_id = 0 kitids = 0x4000
+BEGIN
+  LOOKUP_IDS_SYMBOL_OF_INT class_label ~class~ class_id
+  SET arcane = 0
+  SET divine = 0
+  SET class_count = 1
+  SPRINT xp_row ~MAGE~
+  SPRINT slots_table ~mxsplwiz~
+
+  PATCH_MATCH ~%class_label%~ WITH
+    ~MAGE~ BEGIN
+      SET arcane = 1
+    END
+
+    ~BARD~ BEGIN
+      SET arcane = 1
+      SPRINT xp_row ~BARD~
+      SPRINT slots_table ~mxsplbrd~
+    END
+
+    ~FIGHTER_MAGE~ ~MAGE_THIEF~ BEGIN
+      SET arcane = 1
+      SET class_count = 2
+    END
+
+    ~CLERIC_MAGE~ BEGIN
+      SET arcane = 1
+      SET divine = 1
+      SET class_count = 2
+    END
+
+    ~FIGHTER_MAGE_THIEF~ BEGIN
+      SET arcane = 1
+      SET class_count = 3
+    END
+
+    ~FIGHTER_MAGE_CLERIC~ BEGIN
+      SET arcane = 1
+      SET divine = 1
+      SET class_count = 3
+    END
+
+    ~CLERIC~ ~DRUID~ BEGIN
+      SET divine = 1
+    END
+
+    ~FIGHTER_CLERIC~ ~FIGHTER_DRUID~ ~CLERIC_THIEF~ ~CLERIC_RANGER~ BEGIN
+      SET divine = 1
+      SET class_count = 2
+    END
+    DEFAULT
+  END
+
+  PATCH_IF divine BEGIN
+    ADD_MEMORIZED_SPELL ~SPPR103~ #0 ~priest~   // Cure Light Wounds
+  END
+
+  PATCH_IF arcane BEGIN
+    // The caster level of the class's XP share
+    SET share = xp / class_count
+    SET caster_level = 1
+    SET levels = $c5_tables(~xplevel~ ~_cols~)
+    FOR (i = 2; i <= levels; i += 1) BEGIN
+      LPF c5_lookup_cell STR_VAR table = ~xplevel~ row = EVAL ~%xp_row%~ col = EVAL ~%i%~ RET needed = value found END
+      PATCH_IF found AND IS_AN_INT ~needed~ BEGIN
+        PATCH_IF (needed <= share) BEGIN
+          SET caster_level = i
+        END
+      END
+    END
+
+    // The eight specialist kit ids are consecutive bits starting at bit 6,
+    // and mschool.2da lists the schools in the same order from row 1.
+    // So row i of mschool.2da belongs to the kit whose id is 0x20 shifted left by i.
+    SET school = 0
+    FOR (i = 1; i <= 8; i += 1) BEGIN
+      PATCH_IF (kitids = (0x20 BLSL i)) BEGIN
+        SET school = i
+      END
+    END
+
+    // Wild mages get all wild mage spells learned
+    PATCH_IF (kitids = IDS_OF_SYMBOL (~kit~ ~WILDMAGE~)) BEGIN
+      FOR (i = 0; i < c5_wild_spells_count; i += 1) BEGIN
+        SPRINT resref $c5_wild_spells(~%i%~)
+        SET level = $c5_spell_level(~%resref%~)
+        ADD_KNOWN_SPELL ~%resref%~ (level - 1) ~wizard~
+        SET $known(~%resref%~) = 1
+      END
+    END
+
+    FOR (level = 1; level <= 9; level += 1) BEGIN
+      SET unlocked = (level = 1)
+      LPF c5_lookup_cell STR_VAR table = EVAL ~%slots_table%~ row = EVAL ~%caster_level%~ col = EVAL ~%level%~ RET slots = value found END
+      PATCH_IF found AND IS_AN_INT ~slots~ BEGIN
+        PATCH_IF (slots > 0) BEGIN
+          SET unlocked = 1
+        END
+      END
+
+      PATCH_IF unlocked BEGIN
+        SET count = $c5_wizard_picks_count(~%level%~)
+
+        // The specialist's school first
+        PATCH_IF (school > 0) BEGIN
+          SET picked = 0
+          FOR (j = 0; (j < count) AND (picked = 0); j += 1) BEGIN
+            SPRINT resref $c5_wizard_picks(~%level%~ ~%j%~)
+            PATCH_IF ($c5_spell_school(~%resref%~) = school) AND NOT VARIABLE_IS_SET $known(~%resref%~) BEGIN
+              ADD_KNOWN_SPELL ~%resref%~ (level - 1) ~wizard~
+              SET $known(~%resref%~) = 1
+              SET picked = 1
+            END
+          END
+        END
+
+        SET wanted = 2
+        FOR (j = 0; (j < count) AND (wanted > 0); j += 1) BEGIN
+          SPRINT resref $c5_wizard_picks(~%level%~ ~%j%~)
+          PATCH_IF (($c5_spell_exclusion(~%resref%~) BAND kitids) = 0) AND NOT VARIABLE_IS_SET $known(~%resref%~) BEGIN
+            ADD_KNOWN_SPELL ~%resref%~ (level - 1) ~wizard~
+            SET $known(~%resref%~) = 1
+            SET wanted -= 1
+          END
+        END
+      END
+    END
+  END
+END

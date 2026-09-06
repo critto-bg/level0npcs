@@ -1,0 +1,160 @@
+// 2DA tables in memory, keyed by row and column label.
+
+//
+// Loads the table once into the array c5_tables. Label keys are upper-cased.
+// input: c5_table (name without .2da)
+// output:
+//     $c5_tables(table _rows)       count of data rows
+//     $c5_tables(table _cols)       count of value columns
+//     $c5_tables(table _label i)    label of data row i, original case
+//     $c5_tables(table _col j)      label of value column j, original case
+//     $c5_tables(table ROW _row)    index of the data row with this label
+//     $c5_tables(table ROW COL)     cell value
+//
+DEFINE_ACTION_MACRO c5_load_2da BEGIN
+  ACTION_IF NOT VARIABLE_IS_SET $c5_tables(~%c5_table%~ ~_rows~) BEGIN
+    COPY_EXISTING - ~%c5_table%.2da~ ~override~
+      // The header is the third line. Its tokens are the value column
+      // labels and set the row width. A data row may carry extra tokens
+      // (xplevel.2da).
+      SET c5_line = 0
+      SPRINT c5_header ~~
+      REPLACE_EVALUATE ~^\([^%LNL%]+\)~ BEGIN
+        SET c5_line += 1
+        PATCH_IF (c5_line = 3) BEGIN
+          SPRINT c5_header ~%MATCH1%~
+        END
+      END ~%MATCH0%~
+
+      SET c5_value_cols = 0
+      INNER_PATCH ~%c5_header%~ BEGIN
+        REPLACE_EVALUATE ~[^ %TAB%%WNL%%LNL%]+~ BEGIN
+          SPRINT $c5_tables(~%c5_table%~ ~_col~ ~%c5_value_cols%~) ~%MATCH0%~
+          SET c5_value_cols += 1
+        END ~~
+      END
+      SET c5_row_width = c5_value_cols + 1
+      PATCH_IF (c5_value_cols < 2) BEGIN
+        PATCH_FAIL ~c5_load_2da: %c5_table%.2da has fewer than 2 value columns~
+      END
+
+      // Scan the data rows
+      COUNT_2DA_ROWS c5_row_width c5_rows
+      FOR (c5_row = 0; c5_row < c5_rows; c5_row += 1) BEGIN
+        READ_2DA_ENTRY c5_row 0 c5_row_width c5_row_label
+        SPRINT $c5_tables(~%c5_table%~ ~_label~ ~%c5_row%~) ~%c5_row_label%~
+
+        TO_UPPER c5_row_label
+        SET $c5_tables(~%c5_table%~ ~%c5_row_label%~ ~_row~) = c5_row
+
+        FOR (c5_col = 0; c5_col < c5_value_cols; c5_col += 1) BEGIN
+          READ_2DA_ENTRY c5_row (c5_col + 1) c5_row_width c5_cell_value
+          SPRINT c5_col_label $c5_tables(~%c5_table%~ ~_col~ ~%c5_col%~)
+          TO_UPPER c5_col_label
+          SPRINT $c5_tables(~%c5_table%~ ~%c5_row_label%~ ~%c5_col_label%~) ~%c5_cell_value%~
+        END
+      END
+
+      SET $c5_tables(~%c5_table%~ ~_rows~) = c5_rows
+      SET $c5_tables(~%c5_table%~ ~_cols~) = c5_value_cols
+  END
+END
+
+//
+// Returns cell value from a pre-loaded table by its ROW and COL labels.
+// Callable with LAF and, from a patch, with LPF.
+// Output:
+//     value = the cell and found = 1, or value = ~~ and found = 0.
+//
+DEFINE_DIMORPHIC_FUNCTION c5_lookup_cell
+  STR_VAR table = ~~ row = ~~ col = ~~
+  RET value found
+BEGIN
+  ACTION_TO_UPPER row
+  ACTION_TO_UPPER col
+  ACTION_IF VARIABLE_IS_SET $c5_tables(~%table%~ ~%row%~ ~%col%~) BEGIN
+    OUTER_SPRINT value $c5_tables(~%table%~ ~%row%~ ~%col%~)
+    OUTER_SET found = 1
+  END ELSE BEGIN
+    OUTER_SPRINT value ~~
+    OUTER_SET found = 0
+  END
+END
+
+//
+// Finds the data row of a loaded table whose key_col holds key.
+// Callable with LAF and, from a patch, with LPF.
+// Output: label of the row and found = 1, or label = ~~ and found = 0.
+//
+DEFINE_DIMORPHIC_FUNCTION c5_lookup_row
+  INT_VAR key = 0
+  STR_VAR table = ~~ key_col = ~~
+  RET label found
+BEGIN
+  OUTER_SPRINT label ~~
+  OUTER_SET found = 0
+  OUTER_SET rows = $c5_tables(~%table%~ ~_rows~)
+
+  OUTER_FOR (i = 0; (i < rows) AND (found = 0); i += 1) BEGIN
+    OUTER_SPRINT row_label $c5_tables(~%table%~ ~_label~ ~%i%~)
+    LAF c5_lookup_cell STR_VAR table = EVAL ~%table%~ row = EVAL ~%row_label%~ col = EVAL ~%key_col%~ RET cell = value END
+    ACTION_IF IS_AN_INT ~cell~ BEGIN
+      ACTION_IF (cell = key) BEGIN
+        OUTER_SET found = 1
+        OUTER_SPRINT label ~%row_label%~
+      END
+    END
+  END
+END
+
+//
+// Returns the text of the strref in name_col of the row of a loaded
+// table whose key_col holds key.
+//
+// Output: name and found = 1, or name = ~~ and found = 0.
+//
+DEFINE_ACTION_FUNCTION c5_lookup_name
+  INT_VAR key = 0
+  STR_VAR table = ~~ key_col = ~~ name_col = ~~
+  RET name found
+BEGIN
+  OUTER_SPRINT name ~~
+  LAF c5_lookup_row INT_VAR key = key STR_VAR table = EVAL ~%table%~ key_col = EVAL ~%key_col%~ RET row_label = label found END
+
+  ACTION_IF found BEGIN
+    LAF c5_lookup_cell STR_VAR table = EVAL ~%table%~ row = EVAL ~%row_label%~ col = EVAL ~%name_col%~ RET strref = value END
+    ACTION_IF IS_AN_INT ~strref~ BEGIN
+      OUTER_PATCH ~~ BEGIN
+        GET_STRREF strref name
+      END
+    END
+  END
+END
+
+//
+// Reads a two-column table such as k_t_h.2da.
+// Rows whose first token is not a number (the 2DA signature) are skipped.
+// A missing table gives count = 0.
+//
+DEFINE_ACTION_FUNCTION c5_load_list
+  STR_VAR table = ~~
+  RET count
+  RET_ARRAY c5_list
+BEGIN
+  ACTION_CLEAR_ARRAY c5_list
+  OUTER_SET count = 0
+  SILENT
+
+  ACTION_IF FILE_EXISTS_IN_GAME ~%table%.2da~ BEGIN
+    COPY_EXISTING - ~%table%.2da~ ~override~
+      COUNT_2DA_ROWS 2 rows
+      FOR (i = 0; i < rows; i += 1) BEGIN
+        READ_2DA_ENTRY i 0 2 ordinal
+        PATCH_IF IS_AN_INT ~ordinal~ BEGIN
+          READ_2DA_ENTRY i 1 2 value
+          SPRINT $c5_list(~%count%~) ~%value%~
+          SET count += 1
+        END
+      END
+  END
+END

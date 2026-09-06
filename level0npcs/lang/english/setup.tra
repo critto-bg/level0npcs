@@ -1,0 +1,119 @@
+// Level 0 NPCS: installer strings. UTF-8.
+// @1 to @99: mod-wide.
+// @100 to @199: NPC component names.
+// @200 to @299: menus.
+// @301 to @399: internals (class names, thief skills).
+// @401 to @499: in-game text.
+
+@1   = ~Shared files, required by the NPC components~
+@2   = ~Baldur's Gate NPCs~
+@3   = ~Siege of Dragonspear NPCs~
+@4   = ~Baldur's Gate II NPCs~
+@5   = ~Placeholder~
+@10  = ~This component needs Baldur's Gate: Enhanced Edition, Baldur's Gate II: Enhanced Edition or EET.~
+@11  = ~None of the creature files of %c5_npc% is in the game.~
+@12  = ~Not in the game, skipped:%c5_missing%~
+@13  = ~This component needs the shared files component.~
+@14  = ~Siege of Dragonspear is not merged into the game. Its files are skipped.~
+@15  = ~This component needs Baldur's Gate: Enhanced Edition or EET.~
+@16  = ~This component needs Baldur's Gate II: Enhanced Edition or EET.~
+@17  = ~This component needs Siege of Dragonspear, merged into the game.~
+
+@100 = ~Aerie~
+@101 = ~Ajantis~
+@102 = ~Alora~
+@103 = ~Anomen~
+@104 = ~Baeloth~
+@105 = ~Branwen~
+@106 = ~Cernd~
+@107 = ~Coran~
+@108 = ~Corwin~
+@109 = ~Dorn~
+@110 = ~Dynaheir~
+@111 = ~Edwin~
+@112 = ~Eldoth~
+@113 = ~Faldorn~
+@114 = ~Garrick~
+@115 = ~Glint~
+@116 = ~Haer'Dalis~
+@117 = ~Hexxat~
+@118 = ~Imoen~
+@119 = ~Jaheira~
+@120 = ~Jan~
+@121 = ~Kagain~
+@122 = ~Keldorn~
+@123 = ~Khalid~
+@124 = ~Kivan~
+@125 = ~Korgan~
+@126 = ~Mazzy~
+@127 = ~Minsc~
+@128 = ~M'Khiin~
+@129 = ~Montaron~
+@130 = ~Nalia~
+@131 = ~Neera~
+@132 = ~Quayle~
+@133 = ~Rasaad~
+@134 = ~Safana~
+@135 = ~Sarevok~
+@136 = ~Shar-Teel~
+@137 = ~Skie~
+@138 = ~Tiax~
+@139 = ~Valygar~
+@140 = ~Viconia~
+@141 = ~Voghiln~
+@142 = ~Xan~
+@143 = ~Xzar~
+@144 = ~Yeslick~
+@145 = ~Yoshimo~
+
+@200 = ~%c5_npc% is now: %c5_current%~
+@201 = ~Choose a class for %c5_npc%. Enter the number and press Enter. Enter 0 to leave %c5_npc% as is.~
+@202 = ~Choose a kit for %c5_npc% (%c5_class_name%). Enter the number and press Enter. Enter 0 to go back to the class list.~
+@203 = ~%c5_class_name% (no kit)~
+@204 = ~Enter a number from the list.~
+@205 = ~No change made to %c5_npc%.~
+@206 = ~%c5_npc% starts over as: %c5_chosen_text%.~
+@207 = ~Choose a racial enemy for %c5_npc% (%c5_class_name%). Enter the number and press Enter. Enter 0 to go back to the ability scores.~
+@208 = ~%c5_class_kit%, racial enemy %c5_enemy_name%~
+@209 = ~%c5_npc% has %c5_scores_text%.%c5_nl%Enter six new ability scores from 3 to 25 in that order, separated by spaces, and press Enter.%c5_nl%Press Enter alone to keep the scores. Enter 0 to go back to the kit list.~
+@210 = ~Enter six numbers from 3 to 25, separated by spaces.~
+@211 = ~Enter the exceptional strength percentage, from 1 to 100, and press Enter. Enter 0 to go back to the ability scores.~
+@212 = ~Enter a number from 1 to 100.~
+@213 = ~STR %c5_score_str%, DEX %c5_score_dex%, CON %c5_score_con%, INT %c5_score_int%, WIS %c5_score_wis%, CHA %c5_score_cha%~
+@214 = ~Ability scores: %c5_chosen_scores_text%.~
+@215 = ~Choose a thief skill for %c5_npc% (%c5_class_name%). Each pick adds 5 points, %c5_skill_points_left% left to place.%c5_nl%The game adds the race and Dexterity bonuses, and %c5_skill_level_points% more points at the first level-up.%c5_nl%Enter the number and press Enter. Enter 0 to go back.~
+@216 = ~%c5_skill_name% %c5_skill_value%~
+@217 = ~Thief skills: %c5_chosen_skills_text%.~
+
+@301 = ~Mage~
+@302 = ~Fighter~
+@303 = ~Cleric~
+@304 = ~Thief~
+@305 = ~Bard~
+@306 = ~Paladin~
+@307 = ~Fighter/Mage~
+@308 = ~Fighter/Cleric~
+@309 = ~Fighter/Thief~
+@310 = ~Fighter/Mage/Thief~
+@311 = ~Druid~
+@312 = ~Ranger~
+@313 = ~Mage/Thief~
+@314 = ~Cleric/Mage~
+@315 = ~Cleric/Thief~
+@316 = ~Fighter/Druid~
+@317 = ~Fighter/Mage/Cleric~
+@318 = ~Cleric/Ranger~
+@319 = ~Sorcerer~
+@320 = ~Monk~
+@321 = ~Shaman~
+
+@331 = ~Open Locks~
+@332 = ~Find Traps~
+@333 = ~Pick Pockets~
+@334 = ~Move Silently~
+@335 = ~Hide In Shadows~
+@336 = ~Detect Illusion~
+@337 = ~Set Traps~
+
+@401 = ~Experience points now match <CHARNAME>'s.~
+@402 = ~Neera reaches for the wild magic she was born to, with no spellbook to shape it. Nothing comes of the dweomer itself, but the next spell she casts is thrown to the surge.~

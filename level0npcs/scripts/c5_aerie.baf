@@ -1,0 +1,7 @@
+IF
+  InParty(Myself)
+  HasItem("c5aerie",Myself)
+THEN
+  RESPONSE #100
+    DestroyItem("c5aerie")
+END

@@ -1,0 +1,828 @@
+BACKUP ~level0npcs/backup~
+AUTHOR ~critto~
+VERSION ~1.0.0~
+README ~level0npcs/readme.html~
+
+NO_IF_EVAL_BUG
+ASK_EVERY_COMPONENT
+
+ALWAYS
+  SILENT
+
+  ACTION_IF (~%WEIDU_OS%~ STR_EQ ~win32~) BEGIN
+    OUTER_TEXT_SPRINT c5_nl ~%WNL%~
+  END ELSE BEGIN
+    OUTER_TEXT_SPRINT c5_nl ~%LNL%~
+  END
+
+  INCLUDE ~%MOD_FOLDER%/lib/c5_2da.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/c5_menu.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/c5_chargen.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/c5_spellbook.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/c5_items.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/c5_xp.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/c5_npc.tpa~
+
+  LAM c5_load_tables
+  LAM c5_load_spells
+END
+
+LANGUAGE ~English~ ~english~ ~level0npcs/lang/english/setup.tra~
+
+// Shared files, every NPC component requires it. //
+
+BEGIN @1
+LABEL ~C5-LEVEL0NPCS-SHARED~
+DESIGNATED 0
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @10
+
+LAF c5_install_xp END
+
+// Aerie //
+
+BEGIN @100
+LABEL ~C5-LEVEL0NPCS-AERIE~
+DESIGNATED 100
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @16
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @100
+LAF c5_update_npc
+  STR_VAR
+    bg2 = ~aerie6 aerie7 aerie9 aerie10 aerie11 aerie12~
+  RET c5_avatar = avatar
+END
+LAF c5_aerie_true_form STR_VAR avatar = EVAL ~%c5_avatar%~ END
+LAF c5_aerie_circus END
+LAF c5_hurt_banter STR_VAR object = ~"Aerie"~ hp = ~10~ END
+
+// Ajantis //
+
+BEGIN @101
+LABEL ~C5-LEVEL0NPCS-AJANTIS~
+DESIGNATED 101
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @101
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~ajanti ajanti4 ajanti6~
+END
+
+// Alora //
+
+BEGIN @102
+LABEL ~C5-LEVEL0NPCS-ALORA~
+DESIGNATED 102
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @102
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~alora alora6~
+END
+
+// Anomen //
+
+BEGIN @103
+LABEL ~C5-LEVEL0NPCS-ANOMEN~
+DESIGNATED 103
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @16
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @103
+LAF c5_update_npc
+  STR_VAR
+    bg2 = ~anomen6 anomen7 anomen8 anomen9 anomen10 anomen12~
+    personal = ~npshld~
+END
+
+// Baeloth //
+
+BEGIN @104
+LABEL ~C5-LEVEL0NPCS-BAELOTH~
+DESIGNATED 104
+GROUP @2 (GAME_IS ~bgee eet~)
+GROUP @3 (GAME_INCLUDES ~sod~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @104
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~baeloth~
+    sod = ~baelot7~
+END
+
+// Branwen //
+
+BEGIN @105
+LABEL ~C5-LEVEL0NPCS-BRANWEN~
+DESIGNATED 105
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @105
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~branwe branwe5~
+END
+
+// Cernd //
+
+BEGIN @106
+LABEL ~C5-LEVEL0NPCS-CERND~
+DESIGNATED 106
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @16
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @106
+LAF c5_update_npc
+  STR_VAR
+    bg2 = ~cernd10 cernd12 cernd13 cernd13b cernd14~
+    personal = ~npclck npstaf~
+END
+
+// Coran //
+
+BEGIN @107
+LABEL ~C5-LEVEL0NPCS-CORAN~
+DESIGNATED 107
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @107
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~coran coran5~
+END
+
+// Corwin //
+
+BEGIN @108
+LABEL ~C5-LEVEL0NPCS-CORWIN~
+DESIGNATED 108
+GROUP @3 (GAME_INCLUDES ~sod~)
+REQUIRE_PREDICATE GAME_INCLUDES ~sod~ @17
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @108
+LAF c5_update_npc
+  STR_VAR
+    sod = ~corwin7~
+    kit_effects = ~167 286~
+END
+
+// Dorn //
+
+BEGIN @109
+LABEL ~C5-LEVEL0NPCS-DORN~
+DESIGNATED 109
+GROUP @2 (GAME_IS ~bgee eet~)
+GROUP @3 (GAME_INCLUDES ~sod~)
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @10
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @109
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~dorn dorn2 dorn4 dorn6~
+    sod = ~dorn7~
+    bg2 = ~dorn8 dorn9 dorn10 dorn12 dorn14~
+    kit_effects = ~206 267 296 101 142 169 282~
+END
+LAF c5_dorn_ambush END
+
+// Dynaheir //
+
+BEGIN @110
+LABEL ~C5-LEVEL0NPCS-DYNAHEIR~
+DESIGNATED 110
+GROUP @2 (GAME_IS ~bgee eet~)
+GROUP @3 (GAME_INCLUDES ~sod~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @110
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~dynahe dynahe2 dynahe4 dynahe6~
+    sod = ~dynahe7~
+  RET chosen_class chosen_kitids
+END
+LAF c5_sod_intro_gear INT_VAR class_id = chosen_class kitids = chosen_kitids STR_VAR name = ~dynaheir~ item = ~ring08~ END
+
+// Edwin //
+
+BEGIN @111
+LABEL ~C5-LEVEL0NPCS-EDWIN~
+DESIGNATED 111
+GROUP @2 (GAME_IS ~bgee eet~)
+GROUP @3 (GAME_INCLUDES ~sod~)
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @10
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @111
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~edwin edwin2 edwin4 edwin6~
+    sod = ~edwin7~
+    bg2 = ~edwin7 edwin9 edwin11 edwin12 edwin13 edwin15~
+  RET chosen_class chosen_kitids
+END
+LAF c5_sod_intro_gear INT_VAR class_id = chosen_class kitids = chosen_kitids STR_VAR name = ~edwin~ item = ~ring08~ END
+
+// Eldoth //
+
+BEGIN @112
+LABEL ~C5-LEVEL0NPCS-ELDOTH~
+DESIGNATED 112
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @112
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~eldoth eldoth5~
+    personal = ~arow14~
+END
+
+// Faldorn //
+
+BEGIN @113
+LABEL ~C5-LEVEL0NPCS-FALDORN~
+DESIGNATED 113
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @113
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~faldor faldor5~
+END
+
+// Garrick //
+
+BEGIN @114
+LABEL ~C5-LEVEL0NPCS-GARRICK~
+DESIGNATED 114
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @114
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~garric garric2 garric4 garric6~
+END
+
+// Glint //
+
+BEGIN @115
+LABEL ~C5-LEVEL0NPCS-GLINT~
+DESIGNATED 115
+GROUP @3 (GAME_INCLUDES ~sod~)
+REQUIRE_PREDICATE GAME_INCLUDES ~sod~ @17
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @115
+LAF c5_update_npc
+  STR_VAR
+    sod = ~glint7~
+END
+
+// Haer'Dalis //
+
+BEGIN @116
+LABEL ~C5-LEVEL0NPCS-HAERDALIS~
+DESIGNATED 116
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @16
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @116
+LAF c5_update_npc
+  STR_VAR
+    bg2 = ~haer10 haer11 haer13 haer15 haer19~
+    personal = ~npsw05 npsw06~
+END
+
+// Hexxat //
+
+BEGIN @117
+LABEL ~C5-LEVEL0NPCS-HEXXAT~
+DESIGNATED 117
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @16
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @117
+LAF c5_update_npc
+  STR_VAR
+    bg2 = ~ohhex8 ohhex9 ohhex10 ohhex11 ohhex13 ohhex15 ohhex25~
+END
+LAF c5_hexxat_mist END
+LAF c5_hexxat_join_xp END
+
+// Imoen //
+
+BEGIN @118
+LABEL ~C5-LEVEL0NPCS-IMOEN~
+DESIGNATED 118
+GROUP @2 (GAME_IS ~bgee eet~)
+GROUP @3 (GAME_INCLUDES ~sod~)
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @10
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @118
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~imoen1 imoen2 imoen4 imoen6~
+    sod = ~bdimoen~
+    bg2 = ~imoen6 imoen10 imoen211 imoen213 imoen15~
+END
+
+// Jaheira //
+
+BEGIN @119
+LABEL ~C5-LEVEL0NPCS-JAHEIRA~
+DESIGNATED 119
+GROUP @2 (GAME_IS ~bgee eet~)
+GROUP @3 (GAME_INCLUDES ~sod~)
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @10
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @119
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~jaheir jaheir2 jaheir4 jaheir6~
+    sod = ~jaheir7~
+    bg2 = ~jaheir7 jaheir8 jaheir11 jaheir12 jahei12b jahei14~
+  RET chosen_class chosen_kitids
+END
+LAF c5_sod_intro_gear INT_VAR class_id = chosen_class kitids = chosen_kitids STR_VAR name = ~jaheira~ item = ~ring22~ END
+LAF c5_hurt_banter STR_VAR object = ~Myself~ hp = ~15~ END
+
+// Jan //
+
+BEGIN @120
+LABEL ~C5-LEVEL0NPCS-JAN~
+DESIGNATED 120
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @16
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @120
+LAF c5_update_npc
+  STR_VAR
+    bg2 = ~jan8 jan10 jan11 jan12 jan15~
+    personal = ~nparm npmisc1 npmisc2 xbow12 bolt07~
+END
+
+// Kagain //
+
+BEGIN @121
+LABEL ~C5-LEVEL0NPCS-KAGAIN~
+DESIGNATED 121
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @121
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~kagain kagain2 kagain4 kagain6~
+END
+
+// Keldorn //
+
+BEGIN @122
+LABEL ~C5-LEVEL0NPCS-KELDORN~
+DESIGNATED 122
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @16
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @122
+LAF c5_update_npc
+  STR_VAR
+    bg2 = ~keldor8 keldor9 keldor10 keldor12 keldor14~
+    personal = ~npplat npsw03~
+END
+
+// Khalid //
+
+BEGIN @123
+LABEL ~C5-LEVEL0NPCS-KHALID~
+DESIGNATED 123
+GROUP @2 (GAME_IS ~bgee eet~)
+GROUP @3 (GAME_INCLUDES ~sod~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @123
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~khalid khalid2 khalid4 khalid6~
+    sod = ~khalid7~
+  RET chosen_class chosen_kitids
+END
+LAF c5_sod_intro_gear INT_VAR class_id = chosen_class kitids = chosen_kitids STR_VAR name = ~khalid~ item = ~brac06~ END
+
+// Kivan //
+
+BEGIN @124
+LABEL ~C5-LEVEL0NPCS-KIVAN~
+DESIGNATED 124
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @124
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~kivan kivan4 kivan6~
+END
+
+// Korgan //
+
+BEGIN @125
+LABEL ~C5-LEVEL0NPCS-KORGAN~
+DESIGNATED 125
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @16
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @125
+LAF c5_update_npc
+  STR_VAR
+    bg2 = ~korgan8 korgan9 korgan11 korgan12 korgan15~
+END
+
+// Mazzy //
+
+BEGIN @126
+LABEL ~C5-LEVEL0NPCS-MAZZY~
+DESIGNATED 126
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @16
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @126
+LAF c5_update_npc
+  STR_VAR
+    bg2 = ~mazzy8 mazzy9 mazzy11 mazzy12 mazzy15~
+    personal = ~npbow npsw01~
+END
+LAF c5_mazzy_arvoreen END
+
+// Minsc //
+
+BEGIN @127
+LABEL ~C5-LEVEL0NPCS-MINSC~
+DESIGNATED 127
+GROUP @2 (GAME_IS ~bgee eet~)
+GROUP @3 (GAME_INCLUDES ~sod~)
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @10
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @127
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~minsc minsc2 minsc4 minsc6~
+    sod = ~minsc7~
+    bg2 = ~minsc7 minsc8 minsc9 minsc10 minsc12 minsc14~
+END
+
+// M'Khiin //
+
+BEGIN @128
+LABEL ~C5-LEVEL0NPCS-MKHIIN~
+DESIGNATED 128
+GROUP @3 (GAME_INCLUDES ~sod~)
+REQUIRE_PREDICATE GAME_INCLUDES ~sod~ @17
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @128
+LAF c5_update_npc
+  STR_VAR
+    sod = ~bdmkhi7~
+    kit_effects = ~251~
+END
+
+// Montaron //
+
+BEGIN @129
+LABEL ~C5-LEVEL0NPCS-MONTARON~
+DESIGNATED 129
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @129
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~montar montar2 montar4 montar6~
+END
+
+// Nalia //
+
+BEGIN @130
+LABEL ~C5-LEVEL0NPCS-NALIA~
+DESIGNATED 130
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @16
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @130
+LAF c5_update_npc
+  STR_VAR
+    bg2 = ~nalia8 nalia10 nalia11 nalia13 nalia15 nalia18~
+END
+LAF c5_hurt_banter STR_VAR object = ~"Nalia"~ hp = ~10~ END
+
+// Neera //
+
+BEGIN @131
+LABEL ~C5-LEVEL0NPCS-NEERA~
+DESIGNATED 131
+GROUP @2 (GAME_IS ~bgee eet~)
+GROUP @3 (GAME_INCLUDES ~sod~)
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @10
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @131
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~neera neera2 neera4 neera6~
+    sod = ~neera7~
+    bg2 = ~neera8 neera10 neera11 neera12 neera13 neera15~
+    personal = ~stafn1~
+  RET chosen_class chosen_kitids
+END
+LAF c5_sod_intro_gear INT_VAR class_id = chosen_class kitids = chosen_kitids STR_VAR name = ~neera~ item = ~ring08~ END
+LAF c5_neera_dweomer INT_VAR class_id = chosen_class kitids = chosen_kitids END
+
+// Quayle //
+
+BEGIN @132
+LABEL ~C5-LEVEL0NPCS-QUAYLE~
+DESIGNATED 132
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @132
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~quayle quayle4 quayle6~
+END
+
+// Rasaad //
+
+BEGIN @133
+LABEL ~C5-LEVEL0NPCS-RASAAD~
+DESIGNATED 133
+GROUP @2 (GAME_IS ~bgee eet~)
+GROUP @3 (GAME_INCLUDES ~sod~)
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @10
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @133
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~rasaad rasaad2 rasaad4 rasaad6~
+    sod = ~rasaad7~
+    bg2 = ~rasaad8 rasaad9 rasaad10 rasaad11 rasaad13 rasaad12~
+    kit_effects = ~176 267 169 206 101 190 173 142 296~
+END
+
+// Safana //
+
+BEGIN @134
+LABEL ~C5-LEVEL0NPCS-SAFANA~
+DESIGNATED 134
+GROUP @2 (GAME_IS ~bgee eet~)
+GROUP @3 (GAME_INCLUDES ~sod~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @134
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~safana safana4 safana6~
+    sod = ~safana7~
+  RET chosen_class chosen_kitids
+END
+LAF c5_sod_intro_gear INT_VAR class_id = chosen_class kitids = chosen_kitids STR_VAR name = ~safana~ item = ~ring05~ END
+
+// Sarevok //
+
+BEGIN @135
+LABEL ~C5-LEVEL0NPCS-SAREVOK~
+DESIGNATED 135
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @16
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @135
+LAF c5_update_npc
+  STR_VAR
+    bg2 = ~sarevok~
+END
+
+// Shar-Teel //
+
+BEGIN @136
+LABEL ~C5-LEVEL0NPCS-SHARTEEL~
+DESIGNATED 136
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @136
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~sharte sharte4 sharte6~
+END
+LAF c5_sharteel_duel END
+
+// Skie //
+
+BEGIN @137
+LABEL ~C5-LEVEL0NPCS-SKIE~
+DESIGNATED 137
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @137
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~skie skie6~
+END
+
+// Tiax //
+
+BEGIN @138
+LABEL ~C5-LEVEL0NPCS-TIAX~
+DESIGNATED 138
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @138
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~tiax tiax4 tiax6~
+END
+
+// Valygar //
+
+BEGIN @139
+LABEL ~C5-LEVEL0NPCS-VALYGAR~
+DESIGNATED 139
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @16
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @139
+LAF c5_update_npc
+  STR_VAR
+    bg2 = ~valyg8 valyg9 valyg11 valyg12 valyg14~
+    personal = ~npsw04 npchan~
+END
+
+// Viconia //
+
+BEGIN @140
+LABEL ~C5-LEVEL0NPCS-VICONIA~
+DESIGNATED 140
+GROUP @2 (GAME_IS ~bgee eet~)
+GROUP @3 (GAME_INCLUDES ~sod~)
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @10
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @140
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~viconi viconi4 viconi6~
+    sod = ~viconi7~
+    bg2 = ~viconi6 viconi8 viconi9 viconi11 viconi13 viconi16~
+  RET chosen_class chosen_kitids
+END
+LAF c5_sod_intro_gear INT_VAR class_id = chosen_class kitids = chosen_kitids STR_VAR name = ~viconia~ item = ~ring22~ END
+LAF c5_viconia_protect END
+
+// Voghiln //
+
+BEGIN @141
+LABEL ~C5-LEVEL0NPCS-VOGHILN~
+DESIGNATED 141
+GROUP @3 (GAME_INCLUDES ~sod~)
+REQUIRE_PREDICATE GAME_INCLUDES ~sod~ @17
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @141
+LAF c5_update_npc
+  STR_VAR
+    sod = ~voghil7~
+    kit_effects = ~73 278 251~
+END
+
+// Xan //
+
+BEGIN @142
+LABEL ~C5-LEVEL0NPCS-XAN~
+DESIGNATED 142
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @142
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~xan xan4 xan6~
+END
+
+// Xzar //
+
+BEGIN @143
+LABEL ~C5-LEVEL0NPCS-XZAR~
+DESIGNATED 143
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @143
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~xzar xzar2 xzar4 xzar6~
+END
+
+// Yeslick //
+
+BEGIN @144
+LABEL ~C5-LEVEL0NPCS-YESLICK~
+DESIGNATED 144
+GROUP @2 (GAME_IS ~bgee eet~)
+REQUIRE_PREDICATE GAME_IS ~bgee eet~ @15
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @144
+LAF c5_update_npc
+  STR_VAR
+    bg1 = ~yeslic yeslic5~
+END
+
+// Yoshimo //
+
+BEGIN @145
+LABEL ~C5-LEVEL0NPCS-YOSHIMO~
+DESIGNATED 145
+GROUP @4 (GAME_IS ~bg2ee eet~)
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @16
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+OUTER_SPRINT c5_npc @145
+LAF c5_update_npc
+  STR_VAR
+    bg2 = ~yoshi7 yoshi8 yoshi10 yoshi11 yoshi12~
+    personal = ~npsw02~
+END
+
+// Placeholders that make WeiDU ask about every group //
+
+BEGIN @5
+DEPRECATED @5
+DESIGNATED 97
+GROUP @2 (GAME_IS ~bgee eet~)
+
+BEGIN @5
+DEPRECATED @5
+DESIGNATED 98
+GROUP @3 (GAME_INCLUDES ~sod~)
+
+BEGIN @5
+DEPRECATED @5
+DESIGNATED 99
+GROUP @4 (GAME_IS ~bg2ee eet~)

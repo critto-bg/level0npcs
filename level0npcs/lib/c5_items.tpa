@@ -1,0 +1,283 @@
+// The gear of a creature whose class changed.
+
+// The usability bit of each class: ITM 0x1e holds one bit per class.ids
+// value. Sorcerer shares the mage bit, shaman the druid bit.
+OUTER_SET $c5_class_bit(~BARD~) = BIT6
+OUTER_SET $c5_class_bit(~CLERIC~) = BIT7
+OUTER_SET $c5_class_bit(~CLERIC_MAGE~) = BIT8
+OUTER_SET $c5_class_bit(~CLERIC_THIEF~) = BIT9
+OUTER_SET $c5_class_bit(~CLERIC_RANGER~) = BIT10
+OUTER_SET $c5_class_bit(~FIGHTER~) = BIT11
+OUTER_SET $c5_class_bit(~FIGHTER_DRUID~) = BIT12
+OUTER_SET $c5_class_bit(~FIGHTER_MAGE~) = BIT13
+OUTER_SET $c5_class_bit(~FIGHTER_CLERIC~) = BIT14
+OUTER_SET $c5_class_bit(~FIGHTER_MAGE_CLERIC~) = BIT15
+OUTER_SET $c5_class_bit(~FIGHTER_MAGE_THIEF~) = BIT16
+OUTER_SET $c5_class_bit(~FIGHTER_THIEF~) = BIT17
+OUTER_SET $c5_class_bit(~MAGE~) = BIT18
+OUTER_SET $c5_class_bit(~SORCERER~) = BIT18
+OUTER_SET $c5_class_bit(~MAGE_THIEF~) = BIT19
+OUTER_SET $c5_class_bit(~PALADIN~) = BIT20
+OUTER_SET $c5_class_bit(~RANGER~) = BIT21
+OUTER_SET $c5_class_bit(~THIEF~) = BIT22
+OUTER_SET $c5_class_bit(~MONK~) = BIT29
+OUTER_SET $c5_class_bit(~DRUID~) = BIT30
+OUTER_SET $c5_class_bit(~SHAMAN~) = BIT30
+
+//
+// Whether a class and kit can equip an item: the class bit of ITM 0x1e,
+// the kit bytes against the kit's kitlist UNUSABLE, the opcode 319
+// equipping effects by class or kit. A missing item can be equipped.
+// Callable with LAF and, from a patch, with LPF.
+// Input:
+//     resref      the item, without .itm
+//     class_id    class.ids value
+//     kitids      kit.ids value
+// Output: can_equip = 1 or 0.
+//
+DEFINE_DIMORPHIC_FUNCTION c5_can_equip
+  INT_VAR class_id = 0 kitids = 0x4000
+  STR_VAR resref = ~~
+  RET can_equip
+BEGIN
+  OUTER_SET can_equip = 1
+  ACTION_IF FILE_EXISTS_IN_GAME ~%resref%.itm~ BEGIN
+    LAF c5_kit_unusable INT_VAR kitids = kitids RET unusable END
+    COPY_EXISTING - ~%resref%.itm~ ~override~
+      LOOKUP_IDS_SYMBOL_OF_INT class_label ~class~ class_id
+      READ_LONG 0x1e usability
+      PATCH_IF VARIABLE_IS_SET $c5_class_bit(~%class_label%~) BEGIN
+        PATCH_IF ((usability BAND $c5_class_bit(~%class_label%~)) != 0) BEGIN
+          SET can_equip = 0
+        END
+      END
+
+      READ_BYTE 0x29 kit_byte_1                 // kitlist UNUSABLE, high byte first
+      READ_BYTE 0x2b kit_byte_2
+      READ_BYTE 0x2d kit_byte_3
+      READ_BYTE 0x2f kit_byte_4
+      SET kit_unusable = (kit_byte_1 BLSL 24) BOR (kit_byte_2 BLSL 16) BOR (kit_byte_3 BLSL 8) BOR kit_byte_4
+      PATCH_IF ((kit_unusable BAND unusable) != 0) BEGIN
+        SET can_equip = 0
+      END
+
+      // Opcode 319: power 0 excludes the match, power 1 allows only the match
+      GET_OFFSET_ARRAY effects ITM_V10_GEN_EFFECTS
+      READ_SHORT 0x70 effect_count
+      FOR (i = 0; i < effect_count; i += 1) BEGIN
+        SET effect = $effects(~%i%~)
+        READ_SHORT effect opcode
+        PATCH_IF (opcode = 319) BEGIN
+          READ_BYTE (effect + 0x3) power
+          READ_LONG (effect + 0x4) ids_value
+          READ_LONG (effect + 0x8) ids_file
+
+          SET checked = 1
+          PATCH_IF (ids_file = 5) BEGIN            // class.ids
+            SET match = (ids_value = class_id)
+          END ELSE PATCH_IF (ids_file = 9) BEGIN   // kit.ids
+            SET match = (ids_value = kitids)
+          END ELSE BEGIN
+            SET checked = 0
+          END
+
+          PATCH_IF checked AND (match != power) BEGIN
+            SET can_equip = 0
+          END
+        END
+      END
+  END
+END
+
+//
+// Returns the kitlist UNUSABLE of a kit, or a 0 for the true class
+// or a kit not in the table. Callable with LAF and, from a patch, with LPF.
+// Input:
+//     kitids      kit.ids value
+// Output: unusable
+//
+DEFINE_DIMORPHIC_FUNCTION c5_kit_unusable
+  INT_VAR kitids = 0x4000
+  RET unusable
+BEGIN
+  OUTER_SET unusable = 0
+  LAF c5_lookup_row INT_VAR key = kitids STR_VAR table = ~kitlist~ key_col = ~KITIDS~ RET row_label = label found END
+  ACTION_IF found BEGIN
+    LAF c5_lookup_cell STR_VAR table = ~kitlist~ row = EVAL ~%row_label%~ col = ~UNUSABLE~ RET cell = value END
+    ACTION_IF IS_AN_INT ~cell~ BEGIN
+      OUTER_SET unusable = cell
+    END
+  END
+END
+
+//
+// Moves the item at index in the items table to a free inventory slot.
+// Input:
+//     index       the item's index in the items table
+// Output: moved = 1, or 0 when no inventory slot is free.
+//
+DEFINE_PATCH_FUNCTION c5_move_to_backpack
+  INT_VAR index = 0
+  RET moved
+BEGIN
+  READ_LONG 0x2b8 slots_offset
+  SET moved = 0
+  FOR (i = 21; (i < 37) AND (moved = 0); i += 1) BEGIN
+    READ_SHORT (slots_offset + i * 2) taken
+    PATCH_IF (taken = 0xffff) BEGIN
+      WRITE_SHORT (slots_offset + i * 2) index
+      SET moved = 1
+    END
+  END
+END
+
+//
+// The weapon slots a class and kit get: numwslot.2da, the kit's row,
+// else the class's, else the table's default. The screen shows only
+// those; a weapon in a later slot is invisible.
+// Callable with LAF and, from a patch, with LPF.
+// Input:
+//     class_id    class.ids value
+//     kitids      kit.ids value
+// Output: slots
+//
+DEFINE_DIMORPHIC_FUNCTION c5_weapon_slots
+  INT_VAR class_id = 0 kitids = 0x4000
+  RET slots
+BEGIN
+  LAF c5_lookup_row INT_VAR key = kitids STR_VAR table = ~kitlist~ key_col = ~KITIDS~ RET kit_row = label found END
+  OUTER_SPRINT kit_label ~~
+  ACTION_IF found BEGIN
+    LAF c5_lookup_cell STR_VAR table = ~kitlist~ row = EVAL ~%kit_row%~ col = ~ROWNAME~ RET kit_label = value END
+  END
+  ACTION_TO_UPPER kit_label
+
+  COPY_EXISTING - ~numwslot.2da~ ~override~
+    LOOKUP_IDS_SYMBOL_OF_INT class_label ~class~ class_id
+    TO_UPPER class_label
+
+    // Grab the default value first
+    SET line = 0
+    SET slots = 4
+    REPLACE_EVALUATE ~^\([^%LNL%]+\)~ BEGIN
+      SET line += 1
+      PATCH_IF (line = 2) AND IS_AN_INT ~MATCH1~ BEGIN
+        SET slots = MATCH1
+      END
+    END ~%MATCH0%~
+
+    SET kit_slots = 0
+    SET class_slots = 0
+    COUNT_2DA_ROWS 2 rows
+    FOR (i = 0; i < rows; i += 1) BEGIN
+      READ_2DA_ENTRY i 0 2 label
+      READ_2DA_ENTRY i 1 2 value
+      TO_UPPER label
+      PATCH_IF IS_AN_INT ~value~ BEGIN
+        PATCH_IF (~%label%~ STRING_EQUAL ~%kit_label%~) BEGIN
+          SET kit_slots = value
+        END ELSE PATCH_IF (~%label%~ STRING_EQUAL ~%class_label%~) BEGIN
+          SET class_slots = value
+        END
+      END
+    END
+
+    PATCH_IF (kit_slots > 0) BEGIN
+      SET slots = kit_slots
+    END ELSE PATCH_IF (class_slots > 0) BEGIN
+      SET slots = class_slots
+    END
+END
+
+//
+// Moves the equipped items the class and kit cannot use to free
+// inventory slots, ammunition included, then packs the weapons left into
+// the slots the class and kit get and moves the rest the same way. An
+// item with no free slot stays. The selected weapon becomes weapon slot 1.
+// Input:
+//     class_id    class.ids value
+//     kitids      kit.ids value
+//
+DEFINE_PATCH_FUNCTION c5_unequip
+  INT_VAR class_id = 0 kitids = 0x4000
+BEGIN
+  READ_LONG 0x2b8 slots_offset
+  GET_OFFSET_ARRAY items CRE_V10_ITEMS
+
+  // Slots 0 to 20: helmet, armor, shield, gloves, rings, amulet, belt,
+  // boots, weapons, quivers, cloak, quick items. 21 to 36: inventory.
+  FOR (slot = 0; slot < 21; slot += 1) BEGIN
+    READ_SHORT (slots_offset + slot * 2) index
+    PATCH_IF (index != 0xffff) BEGIN
+      READ_ASCII $items(~%index%~) resref (8) NULL
+      LPF c5_can_equip INT_VAR class_id = class_id kitids = kitids STR_VAR resref = EVAL ~%resref%~ RET can_equip END
+      PATCH_IF (can_equip = 0) BEGIN
+        LPF c5_move_to_backpack INT_VAR index = index RET moved END
+        PATCH_IF moved BEGIN
+          WRITE_SHORT (slots_offset + slot * 2) 0xffff
+        END
+      END
+    END
+  END
+
+  // Pack remaining equipped weapons into available slots, move the rest into backpack
+  LPF c5_weapon_slots INT_VAR class_id = class_id kitids = kitids RET slots END
+  SET kept = 0
+  FOR (slot = 9; slot < 13; slot += 1) BEGIN
+    READ_SHORT (slots_offset + slot * 2) index
+    PATCH_IF (index != 0xffff) BEGIN
+      PATCH_IF (kept < slots) BEGIN
+        WRITE_SHORT (slots_offset + slot * 2) 0xffff
+        WRITE_SHORT (slots_offset + (9 + kept) * 2) index
+        SET kept += 1
+      END ELSE BEGIN
+        LPF c5_move_to_backpack INT_VAR index = index RET moved END
+        PATCH_IF moved BEGIN
+          WRITE_SHORT (slots_offset + slot * 2) 0xffff
+        END
+      END
+    END
+  END
+
+  WRITE_SHORT (slots_offset + 38 * 2) 0        // selected weapon: slot 1
+  WRITE_SHORT (slots_offset + 39 * 2) 0        // its ability
+END
+
+//
+// Opens personal items to every class and kit: clears the class bits
+// of ITM 0x1e and the kit usability bytes. The alignment and race
+// bits, the score minimums and the item_use.2da rules stay. An item
+// that is not in the game is skipped.
+// Input:
+//     resrefs   the items without .itm, separated by spaces
+//
+DEFINE_ACTION_FUNCTION c5_open_items
+  STR_VAR resrefs = ~~
+BEGIN
+  OUTER_SET class_bits = 0
+  ACTION_PHP_EACH c5_class_bit AS class_label => bit BEGIN
+    OUTER_SET class_bits = class_bits BOR bit
+  END
+
+  OUTER_SET listed_count = 0
+  OUTER_PATCH ~%resrefs%~ BEGIN
+    REPLACE_EVALUATE ~\([^ %TAB%%LNL%%WNL%]+\)~ BEGIN
+      SPRINT $listed(~%listed_count%~) ~%MATCH1%~
+      SET listed_count += 1
+    END ~~
+  END
+
+  OUTER_FOR (i = 0; i < listed_count; i += 1) BEGIN
+    OUTER_SPRINT resref $listed(~%i%~)
+    ACTION_IF FILE_EXISTS_IN_GAME ~%resref%.itm~ BEGIN
+      COPY_EXISTING ~%resref%.itm~ ~override~
+        READ_LONG 0x1e usability
+        WRITE_LONG 0x1e (usability BAND (BNOT class_bits))
+        WRITE_BYTE 0x29 0                        // kit usability 1 to 4
+        WRITE_BYTE 0x2b 0
+        WRITE_BYTE 0x2d 0
+        WRITE_BYTE 0x2f 0
+      BUT_ONLY
+    END
+  END
+END

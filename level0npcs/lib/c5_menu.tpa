@@ -1,0 +1,187 @@
+// A numbered menu on the WeiDU console.
+
+//
+// Prints the prompt, then the selection items from $c5_menu_item, then an
+// empty line. Reads a number and asks again until it is valid.
+// Input var allow_zero = 1 accepts 0 as an answer.
+//
+DEFINE_ACTION_FUNCTION c5_menu
+  INT_VAR count = 0 allow_zero = 0
+  STR_VAR prompt = ~~
+  RET choice
+BEGIN
+  OUTER_TEXT_SPRINT menu_text ~~
+  OUTER_FOR (i = 1; i <= count; i += 1) BEGIN
+    OUTER_SPRINT item_text $c5_menu_item(~%i%~)
+    OUTER_TEXT_SPRINT pad ~~
+    ACTION_IF (i < 10) BEGIN
+      OUTER_TEXT_SPRINT pad ~ ~
+    END
+    OUTER_TEXT_SPRINT menu_text ~%menu_text%%c5_nl%%pad%%i%) %item_text%~
+  END
+
+  OUTER_SET lowest = (allow_zero ? 0 : 1)
+  OUTER_SET choice = lowest - 1
+  OUTER_WHILE (choice < lowest) OR (choice > count) BEGIN
+    PRINT ~%prompt%%c5_nl%%menu_text%%c5_nl%~
+
+    ACTION_READLN answer
+    ACTION_IF IS_AN_INT ~answer~ BEGIN
+      OUTER_SET choice = answer
+    END ELSE BEGIN
+      OUTER_SET choice = lowest - 1
+    END
+
+    ACTION_IF (choice < lowest) OR (choice > count) BEGIN
+      PRINT @204
+    END
+  END
+END
+
+//
+// Fills $c5_menu_item(1..count) from the option names.
+//
+DEFINE_ACTION_FUNCTION c5_fill_menu
+  INT_VAR count = 0
+  RET_ARRAY c5_menu_item
+BEGIN
+  OUTER_FOR (i = 1; i <= count; i += 1) BEGIN
+    OUTER_SPRINT $c5_menu_item(~%i%~) $c5_option_name(~%i%~)
+  END
+END
+
+//
+// Asks for the six ability scores on one line and, for a warrior with
+// Strength 18, the exceptional strength. Asks again until the line is
+// six numbers from 3 to 25. The prompt shows c5_scores_text.
+//
+// Input:
+//     class_label   class.ids symbol. Fighters, rangers and paladins,
+//                   single or multi, have exceptional strength.
+// Output:
+//     choice   0 back, 1 keep the scores, 2 new scores
+//     str, str_bonus, dex, con, int, wis, cha   the new scores
+//
+DEFINE_ACTION_FUNCTION c5_score_prompt
+  STR_VAR class_label = ~~
+  RET choice str str_bonus dex con int wis cha
+BEGIN
+  OUTER_SET choice = 0
+  OUTER_SET str = 0
+  OUTER_SET str_bonus = 0
+  OUTER_SET dex = 0
+  OUTER_SET con = 0
+  OUTER_SET int = 0
+  OUTER_SET wis = 0
+  OUTER_SET cha = 0
+
+  OUTER_SET done = 0
+  OUTER_WHILE (done = 0) BEGIN
+    OUTER_SPRINT prompt @209
+    PRINT ~%prompt%%c5_nl%~
+    ACTION_READLN line
+
+    // Split the line into $entry(n), n from 0.
+    OUTER_SET entry_count = 0
+    OUTER_PATCH ~%line%~ BEGIN
+      REPLACE_EVALUATE ~\([^ %TAB%]+\)~ BEGIN
+        SPRINT $entry(~%entry_count%~) ~%MATCH1%~
+        SET entry_count += 1
+      END ~~
+    END
+
+    ACTION_IF (entry_count = 0) BEGIN                    // Enter alone
+      OUTER_SET choice = 1
+      OUTER_SET done = 1
+    END ELSE ACTION_IF (entry_count = 1) AND (~%entry_0%~ STR_EQ ~0~) BEGIN
+      OUTER_SET choice = 0
+      OUTER_SET done = 1
+    END ELSE BEGIN
+      OUTER_SET valid = (entry_count = 6)
+      OUTER_FOR (i = 0; i < entry_count; i += 1) BEGIN
+        OUTER_SPRINT token $entry(~%i%~)
+        ACTION_IF IS_AN_INT ~token~ BEGIN
+          ACTION_IF (token < 3) OR (token > 25) BEGIN
+            OUTER_SET valid = 0
+          END
+        END ELSE BEGIN
+          OUTER_SET valid = 0
+        END
+      END
+
+      ACTION_IF NOT valid BEGIN
+        PRINT @210
+      END ELSE BEGIN
+        OUTER_SET str = $entry(~0~)
+        OUTER_SET dex = $entry(~1~)
+        OUTER_SET con = $entry(~2~)
+        OUTER_SET int = $entry(~3~)
+        OUTER_SET wis = $entry(~4~)
+        OUTER_SET cha = $entry(~5~)
+        OUTER_SET choice = 2
+        OUTER_SET done = 1
+
+        ACTION_IF (str = 18) AND (~%class_label%~ STRING_CONTAINS_REGEXP ~FIGHTER\|RANGER\|PALADIN~ = 0) BEGIN
+          OUTER_SET asked = 0
+          OUTER_WHILE (asked = 0) BEGIN
+            OUTER_SPRINT prompt @211
+            PRINT ~%prompt%%c5_nl%~
+            ACTION_READLN line
+            OUTER_SET percent = 0 - 1
+            ACTION_IF IS_AN_INT ~line~ BEGIN
+              OUTER_SET percent = line
+            END
+
+            ACTION_IF (percent = 0) BEGIN                // back to the score line
+              OUTER_SET done = 0
+              OUTER_SET asked = 1
+            END ELSE ACTION_IF (percent >= 1) AND (percent <= 100) BEGIN
+              OUTER_SET str_bonus = percent
+              OUTER_SET asked = 1
+            END ELSE BEGIN
+              PRINT @212
+            END
+          END
+        END
+      END
+    END
+  END
+END
+
+//
+// Asks where the thief skill points go, 5 per pick, until none is left.
+// The menu lists the seven skills with the points placed so far.
+// Input:
+//     points   the points to place, a multiple of 5
+// Output:
+//     choice            0 back, 1 placed
+//     $c5_skill(1..7)   the points per skill, in menu order
+//
+DEFINE_ACTION_FUNCTION c5_skill_prompt
+  INT_VAR points = 0
+  RET choice
+  RET_ARRAY c5_skill
+BEGIN
+  OUTER_SET choice = 1
+  OUTER_FOR (i = 1; i <= 7; i += 1) BEGIN
+    OUTER_SET $c5_skill(~%i%~) = 0
+  END
+
+  OUTER_SET c5_skill_points_left = points
+  OUTER_WHILE (c5_skill_points_left > 0) AND (choice = 1) BEGIN
+    OUTER_FOR (i = 1; i <= 7; i += 1) BEGIN
+      OUTER_SPRINT c5_skill_name $c5_skill_names(~%i%~)
+      OUTER_SET c5_skill_value = $c5_skill(~%i%~)
+      OUTER_SPRINT $c5_menu_item(~%i%~) @216
+    END
+
+    OUTER_SPRINT prompt @215
+    LAF c5_menu INT_VAR count = 7 allow_zero = 1 STR_VAR prompt = EVAL ~%prompt%~ RET pick = choice END
+    ACTION_IF (pick = 0) BEGIN
+      OUTER_SET choice = 0
+    END ELSE BEGIN
+      OUTER_SET $c5_skill(~%pick%~) = $c5_skill(~%pick%~) + 5
+      OUTER_SET c5_skill_points_left -= 5
+    END
+  END
+END

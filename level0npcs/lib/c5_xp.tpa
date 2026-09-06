@@ -1,0 +1,118 @@
+// XP match: the shared files and the creature effect that summons the
+// helper once the NPC has a level.
+//
+// The chain: opcode 272 on the NPC applies c5xpchk.eff once per round.
+// Its opcode 326 casts c5xpgo.spl when the NPC matches the splprot.2da
+// row "LEVEL >= 1". The spell removes the opcode 272 (opcode 321, by
+// the parent resource tag) and summons c5xp.cre (opcode 67 through
+// c5xpsum.eff), which runs c5xp.bcs: the ladder that raises the NPC's
+// XP to the protagonist's.
+
+//
+// Adds the splprot.2da row, copies the helper creature, the effect files
+// and the spell, and compiles the helper script with the ladder blocks.
+//
+// The ladder: for each chunk, 1,000,000 down to 100 in tenths, and each
+// rung 1 to 99 times the chunk, one block: the protagonist has at least
+// the rung and the NPC at most the rung minus the chunk, so add the
+// chunk. Largest chunks first, rungs descending. Rungs above the game's
+// XP cap never fire.
+//
+DEFINE_ACTION_FUNCTION c5_install_xp BEGIN
+  // The row "stat LEVEL >= 1": 34 1 4. A row with these values from
+  // an earlier run or another mod serves as well.
+  COPY_EXISTING ~splprot.2da~ ~override~
+    COUNT_2DA_ROWS 4 rows
+    SET row = 0 - 1
+    FOR (i = 0; i < rows; i += 1) BEGIN
+      READ_2DA_ENTRY i 1 4 stat
+      READ_2DA_ENTRY i 2 4 value
+      READ_2DA_ENTRY i 3 4 relation
+      PATCH_IF IS_AN_INT stat AND IS_AN_INT value AND IS_AN_INT relation BEGIN
+        PATCH_IF (stat = 34) AND (value = 1) AND (relation = 4) BEGIN
+          SET row = i
+        END
+      END
+    END
+    PATCH_IF (row < 0) BEGIN
+      SET row = rows
+      INSERT_2DA_ROW rows 4 ~%rows%_LEVEL>=1 34 1 4~
+    END
+  BUT_ONLY
+
+  COPY ~%MOD_FOLDER%/resources/c5xpchk.eff~ ~override~
+    WRITE_LONG 0x20 row                             // parameter 2: the row
+  COPY ~%MOD_FOLDER%/resources/c5xpgo.spl~ ~override~
+  COPY ~%MOD_FOLDER%/resources/c5xpsum.eff~ ~override~
+  COPY ~%MOD_FOLDER%/resources/c5xp.cre~ ~override~
+
+  OUTER_SPRINT c5_ladder ~~
+  OUTER_FOR (chunk = 1000000; chunk >= 100; chunk = chunk / 10) BEGIN
+    OUTER_FOR (i = 99; i >= 1; i -= 1) BEGIN
+      OUTER_SET rung = i * chunk
+      ACTION_IF (rung <= 8000000) BEGIN               // the BG2:EE XP cap
+        OUTER_SET above = rung - 1
+        OUTER_SET below = rung - chunk + 1
+        OUTER_SPRINT c5_ladder ~%c5_ladder%IF%LNL%~
+        OUTER_SPRINT c5_ladder ~%c5_ladder%  XPGT(Protagonist,%above%)%LNL%~
+        OUTER_SPRINT c5_ladder ~%c5_ladder%  XPLT(LastSummonerOf(Myself),%below%)%LNL%~
+        OUTER_SPRINT c5_ladder ~%c5_ladder%THEN%LNL%~
+        OUTER_SPRINT c5_ladder ~%c5_ladder%  RESPONSE #100%LNL%~
+        OUTER_SPRINT c5_ladder ~%c5_ladder%    IncrementGlobal("c5_rounds","LOCALS",1)%LNL%~
+        OUTER_SPRINT c5_ladder ~%c5_ladder%    AddXPObject(LastSummonerOf(Myself),%chunk%)%LNL%~
+        OUTER_SPRINT c5_ladder ~%c5_ladder%END%LNL%%LNL%~
+      END
+    END
+  END
+  COMPILE EVALUATE_BUFFER ~%MOD_FOLDER%/scripts/c5xp.baf~ USING ~%MOD_FOLDER%/lang/%s/setup.tra~
+END
+
+//
+// Adds the opcode 272 that applies c5xpchk.eff once per round, once.
+// The file gets V2 effects: they carry the parent resource tag that
+// c5xpgo.spl removes the effect by.
+//
+DEFINE_PATCH_FUNCTION c5_add_xp_effect BEGIN
+  LPF FJ_CRE_EFF_V2 END
+  LPF DELETE_EFFECT INT_VAR match_opcode = 272 STR_VAR match_resource = ~c5xpchk~ END
+  LPF ADD_CRE_EFFECT
+    INT_VAR opcode = 272 target = 1 timing = 9 parameter1 = 6 parameter2 = 3 parameter4 = 1 restype = 1
+    STR_VAR resource = ~c5xpchk~ effsource = ~C5XPGO~
+  END
+END
+
+//
+// Turns off the join XP of the NPC's files. Every joinable's override
+// script has blocks that set its XP to a tier when it joins.
+//
+// Input:
+//     cres  the NPC's resrefs without .cre, separated by spaces
+//
+DEFINE_ACTION_FUNCTION c5_disable_joinxp
+  STR_VAR cres = ~~
+BEGIN
+  OUTER_SET listed_count = 0
+  OUTER_PATCH ~%cres%~ BEGIN
+    REPLACE_EVALUATE ~\([^ %TAB%%LNL%%WNL%]+\)~ BEGIN
+      SPRINT $listed(~%listed_count%~) ~%MATCH1%~
+      SET listed_count += 1
+    END ~~
+  END
+
+  OUTER_FOR (i = 0; i < listed_count; i += 1) BEGIN
+    OUTER_SPRINT resref $listed(~%i%~)
+    ACTION_IF FILE_EXISTS_IN_GAME ~%resref%.cre~ BEGIN
+      OUTER_SPRINT script ~~
+      COPY_EXISTING - ~%resref%.cre~ ~override~
+        READ_ASCII 0x248 script (8) NULL // the override script
+
+      ACTION_TO_LOWER script
+      ACTION_IF NOT (~%script%~ STR_EQ ~~) AND NOT (~%script%~ STR_EQ ~none~)
+                AND NOT VARIABLE_IS_SET $c5_joinxp_done(~%script%~)
+                AND FILE_EXISTS_IN_GAME ~%script%.bcs~ BEGIN
+        OUTER_SET $c5_joinxp_done(~%script%~) = 1
+        EXTEND_TOP ~%script%.bcs~ ~%MOD_FOLDER%/scripts/c5_joinxp.baf~
+      END
+    END
+  END
+END

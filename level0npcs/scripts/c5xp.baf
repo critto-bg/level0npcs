@@ -1,0 +1,20 @@
+// The XP helper, summoned by c5xpgo.spl once the NPC has a level. It
+// raises its summoner's XP to the protagonist's, one block per round,
+// then reports and leaves. The ladder blocks come from c5_install_xp.
+
+// A kill switch to prevent the script firing forever.
+IF
+  GlobalGT("c5_rounds","LOCALS",60)
+THEN
+  RESPONSE #100
+    DestroySelf()
+END
+
+%c5_ladder%
+IF
+  True()
+THEN
+  RESPONSE #100
+    DisplayStringHead(LastSummonerOf(Myself),@401)
+    DestroySelf()
+END

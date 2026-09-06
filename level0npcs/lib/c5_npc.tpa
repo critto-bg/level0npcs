@@ -1,0 +1,488 @@
+// The body of an NPC component.
+
+//
+// The EET names of BG1 and SoD files. On EET, a BG1 or SoD file whose
+// name has a BG2 file carries a _ suffix.
+//
+// Input:
+//     cres     the resrefs without .cre, separated by spaces
+// Returns:
+//     renamed  the list, each name whose _ file is in the game with it
+//
+DEFINE_ACTION_FUNCTION c5_eet_names
+  STR_VAR cres = ~~
+  RET renamed
+BEGIN
+  OUTER_SPRINT renamed ~%cres%~
+  ACTION_IF GAME_IS ~eet~ BEGIN
+    OUTER_SPRINT renamed ~~
+    OUTER_PATCH ~%cres%~ BEGIN
+      REPLACE_EVALUATE ~\([^ %TAB%%LNL%%WNL%]+\)~ BEGIN
+        SPRINT resref ~%MATCH1%~
+        PATCH_IF FILE_EXISTS_IN_GAME ~%resref%_.cre~ BEGIN
+          SPRINT resref ~%resref%_~
+        END
+        SPRINT renamed ~%renamed% %resref%~
+      END ~~
+    END
+  END
+END
+
+//
+// Runs the class, kit, ability score, racial enemy and thief skill
+// selection for a single NPC, opens its personal items to every class,
+// then resets every creature file, writes the scores and skill points
+// the player entered, moves the gear it cannot use to the inventory,
+// fills its spellbook and adds the effect that summons the XP helper.
+//
+// Input:
+//     c5_npc    the NPC's display name, set by the caller
+//     bg1       the NPC's BG1 resrefs without .cre, separated by spaces
+//     sod       the SoD resrefs
+//     bg2       the BG2 and ToB resrefs
+//     personal  the NPC's personal items without .itm
+//  kit_effects  the opcodes of the kit effects baked into the files
+//
+// The lists of the games at hand are used: bg1 on BG:EE and EET, sod
+// when the game includes SoD, bg2 on BG2:EE and EET. An unmerged SoD
+// is reported. Files that are not in the game are skipped.
+// When none is in the game the component fails.
+// The first file found is the reference for race,
+// alignment, scores and the current class.
+// Returns:
+//     avatar         the animate.ids name of the class avatar, from the first
+//                    file that has a character avatar, ~~ when none has
+//     chosen_class   class.ids value of the class the player picked
+//     chosen_kitids  kit.ids value of the kit the player picked
+//
+DEFINE_ACTION_FUNCTION c5_update_npc
+  STR_VAR bg1 = ~~ sod = ~~ bg2 = ~~ personal = ~~ kit_effects = ~~
+  RET avatar chosen_class chosen_kitids
+BEGIN
+  // The files of the games split into $listed(n), n from 0.
+  OUTER_SPRINT cres ~~
+  ACTION_IF GAME_IS ~bgee eet~ BEGIN
+    LAF c5_eet_names STR_VAR cres = EVAL ~%bg1%~ RET renamed END
+    OUTER_SPRINT cres ~%cres% %renamed%~
+  END
+
+  ACTION_IF GAME_INCLUDES ~sod~ BEGIN
+    LAF c5_eet_names STR_VAR cres = EVAL ~%sod%~ RET renamed END
+    OUTER_SPRINT cres ~%cres% %renamed%~
+  END ELSE ACTION_IF NOT (~%sod%~ STR_EQ ~~) AND FILE_EXISTS ~dlc/sod-dlc.zip~ BEGIN
+    PRINT @14
+  END
+
+  ACTION_IF GAME_IS ~bg2ee eet~ BEGIN
+    OUTER_SPRINT cres ~%cres% %bg2%~
+  END
+
+  OUTER_SET listed_count = 0
+  OUTER_PATCH ~%cres%~ BEGIN
+    REPLACE_EVALUATE ~\([^ %TAB%%LNL%%WNL%]+\)~ BEGIN
+      SPRINT $listed(~%listed_count%~) ~%MATCH1%~
+      SET listed_count += 1
+    END ~~
+  END
+
+  // Keep the files that exist in $present(n), n from 0.
+  OUTER_SET present_count = 0
+  OUTER_SPRINT c5_missing ~~
+  OUTER_FOR (i = 0; i < listed_count; i += 1) BEGIN
+    OUTER_SPRINT resref $listed(~%i%~)
+    ACTION_IF FILE_EXISTS_IN_GAME ~%resref%.cre~ BEGIN
+      OUTER_SPRINT $present(~%present_count%~) ~%resref%~
+      OUTER_SET present_count += 1
+    END ELSE BEGIN
+      OUTER_SPRINT c5_missing ~%c5_missing% %resref%~
+    END
+  END
+
+  ACTION_IF (present_count = 0) BEGIN
+    FAIL @11
+  END
+
+  ACTION_IF NOT (~%c5_missing%~ STR_EQ ~~) BEGIN
+    PRINT @12
+  END
+
+  OUTER_SPRINT c5_cre $present(~0~)
+  LAM c5_read_cre
+  PRINT @200
+  LAM c5_choose
+  OUTER_SET chosen_class = c5_chosen_class
+  OUTER_SET chosen_kitids = c5_chosen_kitids
+
+  SILENT
+  LAF c5_open_items STR_VAR resrefs = EVAL ~%personal%~ END
+
+  OUTER_SET kit_opcodes_count = 0
+  OUTER_PATCH ~%kit_effects%~ BEGIN
+    REPLACE_EVALUATE ~\([0-9]+\)~ BEGIN
+      SET $kit_opcodes(~%kit_opcodes_count%~) = MATCH1
+      SET kit_opcodes_count += 1
+    END ~~
+  END
+
+  OUTER_SPRINT avatar ~~
+  OUTER_FOR (i = 0; i < present_count; i += 1) BEGIN
+    OUTER_SPRINT resref $present(~%i%~)
+    COPY_EXISTING ~%resref%.cre~ ~override~
+      READ_LONG 0x18 file_xp
+
+      LPF c5_reset_cre
+        INT_VAR
+          class_id = c5_chosen_class
+          kitids = c5_chosen_kitids
+          racial_enemy = c5_chosen_enemy
+        RET
+          file_avatar = avatar
+      END
+
+      PATCH_IF (~%avatar%~ STR_EQ ~~) BEGIN     // the first file with a character avatar
+        SPRINT avatar ~%file_avatar%~
+      END
+
+      FOR (j = 0; j < kit_opcodes_count; j += 1) BEGIN
+        LPF DELETE_EFFECT INT_VAR match_opcode = $kit_opcodes(~%j%~) END
+      END
+
+      PATCH_IF c5_chosen_scores BEGIN
+        LPF c5_write_scores
+          INT_VAR
+            str = c5_chosen_str
+            str_bonus = c5_chosen_str_bonus
+            dex = c5_chosen_dex
+            con = c5_chosen_con
+            int = c5_chosen_int
+            wis = c5_chosen_wis
+            cha = c5_chosen_cha
+        END
+      END
+
+      PATCH_IF c5_chosen_skills BEGIN
+        LPF c5_write_skills END
+      END
+
+      LPF c5_unequip INT_VAR class_id = c5_chosen_class kitids = c5_chosen_kitids END
+      LPF c5_fill_spellbook INT_VAR xp = file_xp class_id = c5_chosen_class kitids = c5_chosen_kitids END
+      LPF c5_add_xp_effect END
+    BUT_ONLY
+  END
+
+  LAF c5_disable_joinxp STR_VAR cres = EVAL ~%cres%~ END
+
+  PRINT @206
+  ACTION_IF c5_chosen_scores BEGIN
+    PRINT @214
+  END
+  ACTION_IF c5_chosen_skills BEGIN
+    PRINT @217
+  END
+
+  SILENT
+END
+
+//
+// Aerie: the circus files have the ogre avatar, and her dialogue and
+// the circus area script give her the elf back with
+// Polymorph(MAGE_FEMALE_ELF). Rewrites both to the given avatar.
+// Input:
+//     avatar   the animate.ids name of the avatar the reset chose
+//
+DEFINE_ACTION_FUNCTION c5_aerie_true_form
+  STR_VAR avatar = ~~
+BEGIN
+  ACTION_IF NOT (~%avatar%~ STR_EQ ~~) BEGIN
+    COPY_EXISTING ~ar0607.bcs~ ~override~
+      DECOMPILE_AND_PATCH BEGIN
+        REPLACE_TEXTUALLY ~Polymorph(MAGE_FEMALE_ELF)~ ~Polymorph(%avatar%)~
+      END
+    BUT_ONLY
+
+    OUTER_SPRINT c5_avatar ~%avatar%~
+    COMPILE EVALUATE_BUFFER ~%MOD_FOLDER%/scripts/c5_aerie.d~ USING ~%MOD_FOLDER%/lang/%s/setup.tra~
+  END
+END
+
+//
+// Keeps Aerie in the circus, and in the pocket plane in ToB. Her default
+// script, aeriex.bcs, walks her out of the area under 5 HP, and her
+// pre-join files wait at 1 HP. A hidden item of ours, c5aerie, +16
+// maximum HP while worn, goes into those files and is destroyed ahead of
+// every JoinParty() of hers, in her dialogues and in Quayle's. A block on
+// top of her override scripts (scripts/c5_aerie.baf) catches a join from
+// elsewhere, as a fallback.
+//
+DEFINE_ACTION_FUNCTION c5_aerie_circus BEGIN
+  COPY_EXISTING ~minhp1.itm~ ~override/c5aerie.itm~
+    LPF DELETE_EFFECT END
+    LPF ADD_ITEM_EQEFFECT INT_VAR opcode = 18 target = 1 timing = 2 parameter1 = 16 parameter2 = 0 END // 18: maximum HP, cumulative
+
+  ACTION_FOR_EACH resref IN ~aerie6~ ~aerie7~ ~aerie9~ ~aerie10~ ~aerie11~ ~aerie12~ BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~%resref%.cre~ BEGIN
+      COPY_EXISTING ~%resref%.cre~ ~override~
+        ADD_CRE_ITEM ~c5aerie~ #0 #0 #0 ~NONE~ ~LRING RRING AMULET BELT BOOTS CLOAK GLOVES~
+      BUT_ONLY
+    END
+  END
+
+  COPY_EXISTING ~aerie.dlg~ ~override~
+                ~aerie25a.dlg~ ~override~
+                ~aerie25p.dlg~ ~override~
+    DECOMPILE_DLG_TO_D
+      REPLACE_TEXTUALLY EXACT_MATCH ~JoinParty()~ ~DestroyItem("c5aerie") JoinParty()~
+    COMPILE_D_TO_DLG
+  BUT_ONLY
+
+  COPY_EXISTING ~quayle.dlg~ ~override~
+    DECOMPILE_DLG_TO_D
+      REPLACE_TEXTUALLY EXACT_MATCH ~ActionOverride("Aerie",JoinParty())~ ~ActionOverride("Aerie",DestroyItem("c5aerie")) ActionOverride("Aerie",JoinParty())~
+    COMPILE_D_TO_DLG
+  BUT_ONLY
+
+  EXTEND_TOP ~aerie.bcs~ ~%MOD_FOLDER%/scripts/c5_aerie.baf~
+  EXTEND_TOP ~aeri25.bcs~ ~%MOD_FOLDER%/scripts/c5_aerie.baf~
+END
+
+//
+// Keeps Hexxat out of her mist form at level 0. Her override scripts,
+// hexxat.bcs and hexxa25.bcs, turn her amulet into the mist form at
+// 1 HP, which the reset leaves her with, and drop her inventory.
+// Her files get 2 HP instead.
+//
+DEFINE_ACTION_FUNCTION c5_hexxat_mist BEGIN
+  ACTION_FOR_EACH resref IN ~ohhex8~ ~ohhex9~ ~ohhex10~ ~ohhex11~ ~ohhex13~ ~ohhex15~ ~ohhex25~ BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~%resref%.cre~ BEGIN
+      COPY_EXISTING ~%resref%.cre~ ~override~
+        WRITE_SHORT 0x24 2                    // current HP
+        WRITE_SHORT 0x26 2                    // max HP
+      BUT_ONLY
+    END
+  END
+END
+
+//
+// Holds Hexxat's quest reward, 10,000 XP to the party the moment she is
+// in it (hexxat.bcs), until her level-up: a level 0 character with XP
+// cannot take the first level proficiencies.
+//
+DEFINE_ACTION_FUNCTION c5_hexxat_join_xp BEGIN
+  COPY_EXISTING ~hexxat.bcs~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      REPLACE_TEXTUALLY EXACT_MATCH ~Global("OHH_QUEST1_EXPERIENCE","LOCALS",0)~ ~Global("OHH_QUEST1_EXPERIENCE","LOCALS",0) LevelGT(Myself,0)~
+    END
+  BUT_ONLY
+END
+
+//
+// Makes the Bow and Sword of Arvoreen Mazzy's personal items
+//
+DEFINE_ACTION_FUNCTION c5_mazzy_arvoreen BEGIN
+  COPY_EXISTING - ~mazzy8.cre~ ~override~
+    READ_LONG 0x8 name // long name strref
+
+  ACTION_FOR_EACH resref IN ~NPBOW~ ~NPSW01~ BEGIN
+    APPEND ~item_use.2da~ ~%resref% MAZZY 9382 2 %name%~ UNLESS ~^%resref% ~ // 9382: Cannot use item.
+  END
+
+  COPY_EXISTING ~item_use.2da~ ~override~
+    PRETTY_PRINT_2DA
+  BUT_ONLY
+END
+
+//
+// Keeps Jaheira's "you are hurt" banters (bjaheir.dlg) from firing on
+// an NPC who is still at level 0 or 1: HPLT(object, hp) gets
+// LevelGT(object, 1) beside it, as Level 1 NPCs did.
+//
+// Input:
+//     object   the D object, e.g. ~"Aerie"~
+//     hp       the HPLT value of the stock trigger
+//
+DEFINE_ACTION_FUNCTION c5_hurt_banter
+  STR_VAR object = ~~ hp = ~~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~bjaheir.dlg~ BEGIN
+    COPY_EXISTING ~bjaheir.dlg~ ~override~
+      DECOMPILE_DLG_TO_D
+        PATCH_IF (INDEX_BUFFER (~LevelGT(%object%,1)~) < 0) BEGIN
+          REPLACE_TEXTUALLY EXACT_MATCH ~HPLT(%object%,%hp%)~ ~HPLT(%object%,%hp%) LevelGT(%object%,1)~
+        END
+      COMPILE_D_TO_DLG
+    BUT_ONLY
+  END
+END
+
+//
+// Gives Shar-Teel the hit points her duel needs. Her script decides the
+// duel by HP percentages, and her min-HP item keeps her at 1 of 1 HP at
+// level 0, so she could never yield. A hidden item of ours, c5shart,
+// +16 maximum HP while worn (her level 2 value), goes into her files
+// and is destroyed wherever her dialogue and script destroy MIHP1.
+//
+DEFINE_ACTION_FUNCTION c5_sharteel_duel BEGIN
+  COPY_EXISTING ~mihp1.itm~ ~override/c5shart.itm~
+    LPF ALTER_EFFECT INT_VAR match_opcode = 208 opcode = 18 parameter1 = 16 parameter2 = 0 END // 18: maximum HP, cumulative
+
+  ACTION_FOR_EACH resref IN ~sharte~ ~sharte4~ ~sharte6~ BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~%resref%.cre~ BEGIN
+      COPY_EXISTING ~%resref%.cre~ ~override~
+        ADD_CRE_ITEM ~c5shart~ #0 #0 #0 ~NONE~ ~LRING RRING AMULET BELT BOOTS CLOAK GLOVES~
+      BUT_ONLY
+    END
+  END
+
+  COPY_EXISTING ~sharte.dlg~ ~override~
+    DECOMPILE_DLG_TO_D
+      REPLACE_TEXTUALLY EXACT_MATCH ~DestroyItem("MIHP1")~ ~DestroyItem("MIHP1") DestroyItem("c5shart")~
+    COMPILE_D_TO_DLG
+  BUT_ONLY
+
+  COPY_EXISTING ~sharteel.bcs~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      REPLACE_TEXTUALLY EXACT_MATCH ~DestroyItem("MIHP1")~ ~DestroyItem("MIHP1") DestroyItem("c5shart")~
+    END
+  BUT_ONLY
+END
+
+//
+// Keeps Viconia alive until she joins. Two fights precede her joining:
+// the Flaming Fist mercenary of her BG1 dialogue, who turns on everyone
+// present, and the mob at the stake in BG2.
+// c5vicon, a copy of minhp1, goes into the files of those scenes
+// and is destroyed wherever she joins the party.
+//
+DEFINE_ACTION_FUNCTION c5_viconia_protect BEGIN
+  COPY_EXISTING ~minhp1.itm~ ~override/c5vicon.itm~
+
+  // Her BG1 files, the BG1 level 6 file EET renames, and the BG2 ones.
+  ACTION_FOR_EACH resref IN ~viconi~ ~viconi4~ ~viconi6~ ~viconi6_~
+                            ~viconi8~ ~viconi9~ ~viconi11~ ~viconi13~ BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~%resref%.cre~ BEGIN
+      COPY_EXISTING ~%resref%.cre~ ~override~
+        ADD_CRE_ITEM ~c5vicon~ #0 #0 #0 ~NONE~ ~LRING RRING AMULET BELT BOOTS CLOAK GLOVES~
+      BUT_ONLY
+    END
+  END
+
+  // Her join dialogue, both games. On EET the BG1 one is viconi_.
+  ACTION_FOR_EACH resref IN ~viconi~ ~viconi_~ BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~%resref%.dlg~ BEGIN
+      COPY_EXISTING ~%resref%.dlg~ ~override~
+        DECOMPILE_DLG_TO_D
+          REPLACE_TEXTUALLY EXACT_MATCH ~JoinParty()~ ~DestroyItem("c5vicon") JoinParty()~
+        COMPILE_D_TO_DLG
+      BUT_ONLY
+    END
+  END
+END
+
+//
+// Keeps Dorn alive in the ambush that precedes his joining. He gets
+// minhp1, and his script already destroys it by name once
+// Senjak, Dorotea and the two bandits are dead.
+//
+DEFINE_ACTION_FUNCTION c5_dorn_ambush BEGIN
+  ACTION_FOR_EACH resref IN ~dorn~ ~dorn2~ ~dorn4~ ~dorn6~ BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~%resref%.cre~ BEGIN
+      COPY_EXISTING ~%resref%.cre~ ~override~
+        ADD_CRE_ITEM ~minhp1~ #0 #0 #0 ~NONE~ ~LRING RRING AMULET BELT BOOTS CLOAK GLOVES~
+      BUT_ONLY
+    END
+  END
+END
+
+//
+// Keeps the SoD intro from equipping an item the new class or kit cannot
+// use. Without an import, bdintro.bcs hands the default party its BG1
+// gear and equips it with XEquipItem, which ignores the class rules.
+// The item is still given; only the equip goes.
+//
+// Input:
+//     name      the NPC's script name as bdintro.bcs writes it
+//     item      the item without .itm
+//     class_id  class.ids value of the class the player picked
+//     kitids    kit.ids value of the kit the player picked
+//
+DEFINE_ACTION_FUNCTION c5_sod_intro_gear
+  INT_VAR class_id = 0 kitids = 0x4000
+  STR_VAR name = ~~ item = ~~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~bdintro.bcs~ BEGIN
+    LAF c5_can_equip INT_VAR class_id = class_id kitids = kitids STR_VAR resref = EVAL ~%item%~ RET can_equip END
+    ACTION_IF NOT can_equip BEGIN
+      COPY_EXISTING ~bdintro.bcs~ ~override~
+        DECOMPILE_AND_PATCH BEGIN
+          REPLACE_TEXTUALLY ~XEquipItem("%item%","%name%",[^)]*)~ ~~
+        END
+      BUT_ONLY
+    END
+  END
+END
+
+//
+// Keeps Neera's ToB quest going for a Neera who is no longer a wild mage.
+// In the clearing she says she will cast Nahal's Reckless Dweomer, and
+// oh6400.bcs waits for that cast before the Red Wizards come. Only a wild
+// mage can learn spwi124, so nothing else would ever advance the plot.
+// A Neera who still casts wizard spells is given the spell itself.
+// Any other Neera is given c5nahal, an innate copy of it, and oh6400.bcs
+// a block that reads the innate cast the same way.
+//
+// Input:
+//     class_id  class.ids value of the class the player picked
+//     kitids    kit.ids value of the kit the player picked
+//
+DEFINE_ACTION_FUNCTION c5_neera_dweomer
+  INT_VAR class_id = 0 kitids = 0x4000
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~oh6400.bcs~ // ToB only
+            AND NOT (kitids = IDS_OF_SYMBOL (~kit~ ~WILDMAGE~))
+  BEGIN
+    OUTER_SET arcane = 0
+    ACTION_FOR_EACH label IN ~MAGE~ ~SORCERER~ ~BARD~ ~FIGHTER_MAGE~
+                             ~MAGE_THIEF~ ~CLERIC_MAGE~ ~FIGHTER_MAGE_THIEF~
+                             ~FIGHTER_MAGE_CLERIC~
+    BEGIN
+      ACTION_IF (class_id = IDS_OF_SYMBOL (~class~ ~%label%~)) BEGIN
+        OUTER_SET arcane = 1
+      END
+    END
+
+    ACTION_IF NOT arcane BEGIN
+      COPY_EXISTING ~spwi124.spl~ ~override/c5nahal.spl~
+        SAY 0x50 @402                             // description
+        WRITE_SHORT 0x1c 4                        // spell type: innate
+        WRITE_LONG  0x1e 0                        // no school exclusions
+        READ_LONG   0x64 headers_off
+        READ_SHORT  0x68 headers_count
+        FOR (i = 0; i < headers_count; i += 1) BEGIN
+          SET header = headers_off + (i * 0x28)
+          WRITE_SHORT (header + 0x02) 4           // location: innate
+          WRITE_BYTE  (header + 0x0c) 5           // target: the caster
+          WRITE_SHORT (header + 0x12) 1           // casting time
+        END
+        LPF DELETE_EFFECT INT_VAR match_opcode = 214 END // the spell menu
+
+      EXTEND_TOP ~oh6400.bcs~ ~%MOD_FOLDER%/scripts/c5_neera_dweomer.baf~
+    END
+
+    ACTION_FOR_EACH resref IN ~neera~ ~neera2~ ~neera4~ ~neera6~ ~neera7~
+                              ~neera8~ ~neera10~ ~neera11~ ~neera12~
+                              ~neera13~ ~neera15~
+    BEGIN
+      ACTION_IF FILE_EXISTS_IN_GAME ~%resref%.cre~ BEGIN
+        ACTION_IF arcane BEGIN
+          COPY_EXISTING ~%resref%.cre~ ~override~
+            ADD_KNOWN_SPELL ~spwi124~ #0 ~wizard~
+          BUT_ONLY
+        END ELSE BEGIN
+          COPY_EXISTING ~%resref%.cre~ ~override~
+            ADD_MEMORIZED_SPELL ~C5NAHAL~ #0 ~innate~
+          BUT_ONLY
+        END
+      END
+    END
+  END
+END
