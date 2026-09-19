@@ -6,9 +6,11 @@ A WeiDU mod for BG:EE, BG:SoD, BG2:EE, and EET.
 
 Level 0 NPCs is a modern reimplementation of the classic mod [Level 1 NPCs](https://www.gibberlings3.net/mods/npcs/level1npcs/) designed to be compatible with the Enhanced Editions. It allows you to change class, kit and the primary attributes of joinable characters. The mod strives to provide the experience of its predecessor while drawing inspiration and its core mechanic from another great mod, [NPC_EE](https://github.com/UnearthedArcana/NPC_EE). Without these two mods, Level 0 NPCs wouldn't exist.
 
-## How it works
-
 The mod allows you to re-spec any joinable NPC from Baldur's Gate I and II, and the Siege of Dragonspear expansion. All vanilla joinable characters are supported, with a few notable exceptions. Unlike the original Level 1 NPCs that fully reconstructed the character based on the player's choices, Level 0 NPCs outsources most of the complexity to the game engine.
+
+It supports versions 2.6.6 and 2.7.3 of the game, and installs on BG:EE (with or without the SoD expansion), BG2:EE, or the [Enhanced Edition Trilogy](https://github.com/Gibberlings3/EET).
+
+## How it works
 
 Each character has its own component during installation time. You may choose class and kit, redistribute primary attributes, and, optionally, select a racial enemy or assign some of the thieving skill points (if the chosen class allows it). When you encounter the character in the game, they will join with a level of 0, an XP value of 0, and a single Hit Point. Once they do, **you should level them up immediately**, before they gain any XP. You will be given the opportunity to choose the initial proficiencies and spells, and distribute the rest of the thieving skill points (if any).
 
@@ -34,7 +36,7 @@ The mod does not provide means to set up dual-class combinations of a specific, 
 
 ## Installation
 
-Level 0 NPCs is a regular WeiDU mod that ships with the WeiDU binary appropriate for the chosen platform and architecture. It supports versions 2.6.6 and 2.7.3 of the game, and installs on BG:EE (with or without the SoD expansion), BG2:EE, or the [Enhanced Edition Trilogy](https://github.com/Gibberlings3/EET).
+Level 0 NPCs is a regular WeiDU mod that ships with the WeiDU binary appropriate for the chosen platform and architecture.
 
 The mod is highly interactive and expects a lot of user input. Therefore, I recommend performing the installation by hand, by running the setup-level0npcs executable. I have not tested any of the automated mod installers.
 
