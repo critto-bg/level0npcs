@@ -10,3 +10,6 @@ bench
 level0npcs/backup/
 .DS_Store
 .claude
+
+# build output
+dist/

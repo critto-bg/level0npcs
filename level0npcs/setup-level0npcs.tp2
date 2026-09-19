@@ -1,6 +1,6 @@
 BACKUP ~level0npcs/backup~
 AUTHOR ~critto~
-VERSION ~1.0.0~
+VERSION ~1.0.0~ // x-release-please-version
 README ~level0npcs/readme.html~
 
 NO_IF_EVAL_BUG
