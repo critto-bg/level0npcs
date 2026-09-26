@@ -8,7 +8,7 @@ Level 0 NPCs is a modern reimplementation of the classic mod [Level 1 NPCs](http
 
 The mod allows you to re-spec any joinable NPC from Baldur's Gate I and II, and the Siege of Dragonspear expansion. All vanilla joinable characters are supported, with a few notable exceptions. Unlike the original Level 1 NPCs that fully reconstructed the character based on the player's choices, Level 0 NPCs outsources most of the complexity to the game engine.
 
-It supports versions 2.6.6 and 2.7.3 of the game, and installs on BG:EE (with or without the SoD expansion), BG2:EE, or the [Enhanced Edition Trilogy](https://github.com/Gibberlings3/EET).
+It supports versions 2.5, 2.6.6 and 2.7.3 of the game, and installs on BG:EE (with or without the SoD expansion), BG2:EE, or the [Enhanced Edition Trilogy](https://github.com/Gibberlings3/EET).
 
 ## How it works
 
