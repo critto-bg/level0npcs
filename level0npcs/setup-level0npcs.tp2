@@ -21,6 +21,7 @@ ALWAYS
   INCLUDE ~%MOD_FOLDER%/lib/c5_spellbook.tpa~
   INCLUDE ~%MOD_FOLDER%/lib/c5_items.tpa~
   INCLUDE ~%MOD_FOLDER%/lib/c5_xp.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/c5_mods.tpa~
   INCLUDE ~%MOD_FOLDER%/lib/c5_npc.tpa~
 
   LAM c5_load_tables

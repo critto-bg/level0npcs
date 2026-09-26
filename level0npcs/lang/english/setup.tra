@@ -18,6 +18,7 @@
 @15  = ~This component needs Baldur's Gate: Enhanced Edition or EET.~
 @16  = ~This component needs Baldur's Gate II: Enhanced Edition or EET.~
 @17  = ~This component needs Siege of Dragonspear, merged into the game.~
+@18  = ~Improved Anvil is installed: its join XP is turned off for %c5_npc%.~
 
 @100 = ~Aerie~
 @101 = ~Ajantis~

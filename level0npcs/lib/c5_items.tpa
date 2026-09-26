@@ -111,6 +111,57 @@ BEGIN
 END
 
 //
+// Locks items to a script name: an equipping opcode 319 effect, power 1,
+// parameter2 11. An item that has the lock already is left alone.
+// Missing items are skipped.
+//
+// Input:
+//     name         the script name
+//     name_strref  the strref of the NPC's name, shown in the description
+//     resrefs      the items without .itm, separated by spaces
+//
+DEFINE_ACTION_FUNCTION c5_lock_items
+  INT_VAR name_strref = 0
+  STR_VAR name = ~~ resrefs = ~~
+BEGIN
+  OUTER_SET listed_count = 0
+  OUTER_PATCH ~%resrefs%~ BEGIN
+    REPLACE_EVALUATE ~\([^ %TAB%%LNL%%WNL%]+\)~ BEGIN
+      SPRINT $listed(~%listed_count%~) ~%MATCH1%~
+      SET listed_count += 1
+    END ~~
+  END
+
+  OUTER_FOR (i = 0; i < listed_count; i += 1) BEGIN
+    OUTER_SPRINT resref $listed(~%i%~)
+    ACTION_IF FILE_EXISTS_IN_GAME ~%resref%.itm~ BEGIN
+      COPY_EXISTING ~%resref%.itm~ ~override~
+        SET locked = 0
+        GET_OFFSET_ARRAY effects ITM_V10_GEN_EFFECTS
+        READ_SHORT 0x70 effect_count
+
+        FOR (j = 0; j < effect_count; j += 1) BEGIN
+          SET effect = $effects(~%j%~)
+          READ_SHORT effect opcode
+          READ_LONG (effect + 0x8) ids_file
+          READ_ASCII (effect + 0x14) lock_name (8) NULL
+          PATCH_IF (opcode = 319) AND (ids_file = 11) AND (~%lock_name%~ STRING_EQUAL_CASE ~%name%~) BEGIN
+            SET locked = 1
+          END
+        END
+
+        PATCH_IF NOT locked BEGIN
+          LPF ADD_ITEM_EQEFFECT
+            INT_VAR opcode = 319 target = 1 power = 1 parameter2 = 11 timing = 2 special = name_strref
+            STR_VAR resource = EVAL ~%name%~
+          END
+        END
+      BUT_ONLY
+    END
+  END
+END
+
+//
 // Moves the item at index in the items table to a free inventory slot.
 // Input:
 //     index       the item's index in the items table

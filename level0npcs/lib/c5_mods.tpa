@@ -1,0 +1,116 @@
+// Other mods: what an NPC component does when a mod that has its own
+// take on the joinables is installed. One function per mod, and the
+// dispatcher c5_update_npc calls for every NPC.
+
+//
+// Runs the per-NPC work of every supported mod that is installed.
+//
+// Input:
+//     cres      the NPC's resrefs without .cre, separated by spaces
+//     class_id  class.ids value of the class the player picked
+//     kitids    kit.ids value of the kit the player picked
+//
+DEFINE_ACTION_FUNCTION c5_mods_npc
+  INT_VAR class_id = 0 kitids = 0x4000
+  STR_VAR cres = ~~
+BEGIN
+  ACTION_IF MOD_IS_INSTALLED ~improvedanvil/setup-improvedanvil.tp2~ 0 BEGIN
+    LAF c5_mods_improvedanvil STR_VAR cres = EVAL ~%cres%~ END
+  END
+END
+
+// The items Improved Anvil's smiths forge from an NPC's personal items,
+// by script name.
+ACTION_DEFINE_ASSOCIATIVE_ARRAY c5_ia_items BEGIN
+  ~AERIE~     => ~s!blun06~
+  ~ANOMEN~    => ~S!shld01~
+  ~CERND~     => ~S!clck01 S!staf04~
+  ~DORN~      => ~s!sw23~
+  ~HAERDALIS~ => ~S!sw05~
+  ~HEXXAT~    => ~s!clck08 s!clck09~
+  ~IMOEN2~    => ~s!amul08~
+  ~JAN~       => ~S!jan01 S!janbow~
+  ~KELDORN~   => ~S!plat04~
+  ~MAZZY~     => ~S!sw02 S!shld04 S!shld05~
+  ~MINSC~     => ~s!sw24~
+  ~NEERA~     => ~S!robe03~
+  ~RASAAD~    => ~S!boot04~
+  ~SAREVOK~   => ~s!sw25~
+  ~VALYGAR~   => ~S!leat03 S!sw01~
+END
+
+ACTION_DEFINE_ASSOCIATIVE_ARRAY c5_ia_locks BEGIN
+  ~CERND~ => ~S!clck01~
+END
+
+//
+// Improved Anvil: its join dialogues cast S!xp ahead of JoinParty(),
+// an XP ladder of its own that would give a reset NPC XP before the
+// 0 to 1 level-up. The call goes out of the dialogues the NPC's files
+// name, both its plain and its ActionOverride form, once per dialogue.
+//
+// The forged versions of the NPC's personal items (c5_ia_items) are
+// opened to every class and kit, and locked to the NPC's script name
+// where Improved Anvil forgot to (c5_ia_locks).
+//
+// Input:
+//     cres  the NPC's resrefs without .cre, separated by spaces
+//
+DEFINE_ACTION_FUNCTION c5_mods_improvedanvil
+  STR_VAR cres = ~~
+BEGIN
+  PRINT @18
+  SILENT
+
+  OUTER_SET listed_count = 0
+  OUTER_PATCH ~%cres%~ BEGIN
+    REPLACE_EVALUATE ~\([^ %TAB%%LNL%%WNL%]+\)~ BEGIN
+      SPRINT $listed(~%listed_count%~) ~%MATCH1%~
+      SET listed_count += 1
+    END ~~
+  END
+
+  OUTER_FOR (i = 0; i < listed_count; i += 1) BEGIN
+    OUTER_SPRINT resref $listed(~%i%~)
+    ACTION_IF FILE_EXISTS_IN_GAME ~%resref%.cre~ BEGIN
+      OUTER_SPRINT dialog ~~
+      COPY_EXISTING - ~%resref%.cre~ ~override~
+        READ_ASCII 0x2cc dialog (8) NULL // the dialogue
+
+      ACTION_TO_LOWER dialog
+      ACTION_IF NOT (~%dialog%~ STR_EQ ~~) AND NOT (~%dialog%~ STR_EQ ~none~)
+                AND NOT VARIABLE_IS_SET $c5_ia_done(~%dialog%~)
+                AND FILE_EXISTS_IN_GAME ~%dialog%.dlg~
+      BEGIN
+        OUTER_SET $c5_ia_done(~%dialog%~) = 1
+        COPY_EXISTING ~%dialog%.dlg~ ~override~
+          DECOMPILE_DLG_TO_D
+            REPLACE_TEXTUALLY ~ActionOverride("[^"]+",ReallyForceSpellRES("S!xp",Myself))[ %TAB%%LNL%%WNL%]*~ ~~
+            REPLACE_TEXTUALLY ~ReallyForceSpellRES("S!xp",Myself)[ %TAB%%LNL%%WNL%]*~ ~~
+          COMPILE_D_TO_DLG
+        BUT_ONLY
+      END
+
+      // The forged items of the NPC, once per script name.
+      OUTER_SPRINT name ~~
+      COPY_EXISTING - ~%resref%.cre~ ~override~
+        READ_LONG  0x8   name_strref                 // long name
+        READ_ASCII 0x280 name (32) NULL              // script name
+
+      ACTION_TO_UPPER name
+      ACTION_IF VARIABLE_IS_SET $c5_ia_items(~%name%~)
+                AND NOT VARIABLE_IS_SET $c5_ia_items_done(~%name%~)
+      BEGIN
+        OUTER_SET $c5_ia_items_done(~%name%~) = 1
+        LAF c5_open_items STR_VAR resrefs = EVAL $c5_ia_items(~%name%~) END
+
+        ACTION_IF VARIABLE_IS_SET $c5_ia_locks(~%name%~) BEGIN
+          LAF c5_lock_items
+            INT_VAR name_strref = name_strref
+            STR_VAR name = EVAL ~%name%~ resrefs = EVAL $c5_ia_locks(~%name%~)
+          END
+        END
+      END
+    END
+  END
+END
