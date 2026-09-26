@@ -111,7 +111,16 @@ BEGIN
                 AND NOT VARIABLE_IS_SET $c5_joinxp_done(~%script%~)
                 AND FILE_EXISTS_IN_GAME ~%script%.bcs~ BEGIN
         OUTER_SET $c5_joinxp_done(~%script%~) = 1
-        EXTEND_TOP ~%script%.bcs~ ~%MOD_FOLDER%/scripts/c5_joinxp.baf~
+        OUTER_SET blocked = 0
+
+        // Idempotency check – if the block's already there, we no-op out.
+        COPY_EXISTING - ~%script%.bcs~ ~override~
+          DECOMPILE_AND_PATCH BEGIN
+            SET blocked = (INDEX_BUFFER (~Global("BD_JOINXP","LOCALS",0)[ %TAB%%LNL%%WNL%]*InParty(Myself)[ %TAB%%LNL%%WNL%]*THEN~) >= 0)
+          END
+        ACTION_IF NOT blocked BEGIN
+          EXTEND_TOP ~%script%.bcs~ ~%MOD_FOLDER%/scripts/c5_joinxp.baf~
+        END
       END
     END
   END

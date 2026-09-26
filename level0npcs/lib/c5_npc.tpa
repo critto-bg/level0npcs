@@ -33,7 +33,8 @@ END
 // selection for a single NPC, opens its personal items to every class,
 // then resets every creature file, writes the scores and skill points
 // the player entered, moves the gear it cannot use to the inventory,
-// fills its spellbook and adds the effect that summons the XP helper.
+// fills its spellbook, adds the effect that summons the XP helper,
+// turns off the game's join XP and runs the mod compatibility check.
 //
 // Input:
 //     c5_npc    the NPC's display name, set by the caller
@@ -171,6 +172,7 @@ BEGIN
   END
 
   LAF c5_disable_joinxp STR_VAR cres = EVAL ~%cres%~ END
+  LAF c5_mods_npc INT_VAR class_id = c5_chosen_class kitids = c5_chosen_kitids STR_VAR cres = EVAL ~%cres%~ END
 
   PRINT @206
   ACTION_IF c5_chosen_scores BEGIN
