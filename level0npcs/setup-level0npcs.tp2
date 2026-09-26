@@ -344,7 +344,6 @@ BEGIN @118
 LABEL ~C5-LEVEL0NPCS-IMOEN~
 DESIGNATED 118
 GROUP @2 (GAME_IS ~bgee eet~)
-GROUP @3 (GAME_INCLUDES ~sod~)
 GROUP @4 (GAME_IS ~bg2ee eet~)
 REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @10
 REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
@@ -353,7 +352,6 @@ OUTER_SPRINT c5_npc @118
 LAF c5_update_npc
   STR_VAR
     bg1 = ~imoen1 imoen2 imoen4 imoen6~
-    sod = ~bdimoen~
     bg2 = ~imoen6 imoen10 imoen211 imoen213 imoen15~
 END
 
