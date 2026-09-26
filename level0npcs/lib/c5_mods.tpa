@@ -19,11 +19,39 @@ BEGIN
   END
 END
 
+// The items Improved Anvil's smiths forge from an NPC's personal items,
+// by script name.
+ACTION_DEFINE_ASSOCIATIVE_ARRAY c5_ia_items BEGIN
+  ~AERIE~     => ~s!blun06~
+  ~ANOMEN~    => ~S!shld01~
+  ~CERND~     => ~S!clck01 S!staf04~
+  ~DORN~      => ~s!sw23~
+  ~HAERDALIS~ => ~S!sw05~
+  ~HEXXAT~    => ~s!clck08 s!clck09~
+  ~IMOEN2~    => ~s!amul08~
+  ~JAN~       => ~S!jan01 S!janbow~
+  ~KELDORN~   => ~S!plat04~
+  ~MAZZY~     => ~S!sw02 S!shld04 S!shld05~
+  ~MINSC~     => ~s!sw24~
+  ~NEERA~     => ~S!robe03~
+  ~RASAAD~    => ~S!boot04~
+  ~SAREVOK~   => ~s!sw25~
+  ~VALYGAR~   => ~S!leat03 S!sw01~
+END
+
+ACTION_DEFINE_ASSOCIATIVE_ARRAY c5_ia_locks BEGIN
+  ~CERND~ => ~S!clck01~
+END
+
 //
 // Improved Anvil: its join dialogues cast S!xp ahead of JoinParty(),
 // an XP ladder of its own that would give a reset NPC XP before the
 // 0 to 1 level-up. The call goes out of the dialogues the NPC's files
 // name, both its plain and its ActionOverride form, once per dialogue.
+//
+// The forged versions of the NPC's personal items (c5_ia_items) are
+// opened to every class and kit, and locked to the NPC's script name
+// where Improved Anvil forgot to (c5_ia_locks).
 //
 // Input:
 //     cres  the NPC's resrefs without .cre, separated by spaces
@@ -52,7 +80,8 @@ BEGIN
       ACTION_TO_LOWER dialog
       ACTION_IF NOT (~%dialog%~ STR_EQ ~~) AND NOT (~%dialog%~ STR_EQ ~none~)
                 AND NOT VARIABLE_IS_SET $c5_ia_done(~%dialog%~)
-                AND FILE_EXISTS_IN_GAME ~%dialog%.dlg~ BEGIN
+                AND FILE_EXISTS_IN_GAME ~%dialog%.dlg~
+      BEGIN
         OUTER_SET $c5_ia_done(~%dialog%~) = 1
         COPY_EXISTING ~%dialog%.dlg~ ~override~
           DECOMPILE_DLG_TO_D
@@ -60,6 +89,27 @@ BEGIN
             REPLACE_TEXTUALLY ~ReallyForceSpellRES("S!xp",Myself)[ %TAB%%LNL%%WNL%]*~ ~~
           COMPILE_D_TO_DLG
         BUT_ONLY
+      END
+
+      // The forged items of the NPC, once per script name.
+      OUTER_SPRINT name ~~
+      COPY_EXISTING - ~%resref%.cre~ ~override~
+        READ_LONG  0x8   name_strref                 // long name
+        READ_ASCII 0x280 name (32) NULL              // script name
+
+      ACTION_TO_UPPER name
+      ACTION_IF VARIABLE_IS_SET $c5_ia_items(~%name%~)
+                AND NOT VARIABLE_IS_SET $c5_ia_items_done(~%name%~)
+      BEGIN
+        OUTER_SET $c5_ia_items_done(~%name%~) = 1
+        LAF c5_open_items STR_VAR resrefs = EVAL $c5_ia_items(~%name%~) END
+
+        ACTION_IF VARIABLE_IS_SET $c5_ia_locks(~%name%~) BEGIN
+          LAF c5_lock_items
+            INT_VAR name_strref = name_strref
+            STR_VAR name = EVAL ~%name%~ resrefs = EVAL $c5_ia_locks(~%name%~)
+          END
+        END
       END
     END
   END
