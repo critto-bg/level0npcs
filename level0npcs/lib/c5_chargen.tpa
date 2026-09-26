@@ -401,7 +401,8 @@ END
 // Lists the kits of the class: the true class first, then the kitlist
 // rows of the class that any K_*_* list of its kittable row names, in
 // kitlist order. Allows every kit for every race. A multi-class gets
-// the true class only.
+// what its lists name: none in the vanilla game, a mod's kits with the
+// mod's tables.
 //
 // Output:
 //     count

@@ -78,6 +78,10 @@ Mods with their own take on the joinable characters that Level 0 NPCs knows abou
 
 Improved Anvil's smiths forge upgraded versions of the personal items. For a character you re-spec, those follow the personal items: any class and kit can use them, and they stay locked to their owner. The alignment and ability score requirements Improved Anvil puts on some of them remain untouched.
 
+### Morpheus562's Kitpack
+
+[Morpheus562's Kitpack](https://www.morpheus-mart.com/morpheus562s-kitpack) adds kits, and Level 0 NPCs offers each of them. The only exception are the two prestige kits, Deathbringer and Archmage, which are not offered. The mods grants them in game to the protagonist alone, at level 15 and level 18, and Level 0 NPCs respects the author's intent.
+
 ## Game quirks
 
 This section lists a variety of game quirks, and the ways the mod handles them. For the purpose of brevity, I will refer to the process of leveling up a character from level 0 to level 1 as `Level0->1` from here on.
