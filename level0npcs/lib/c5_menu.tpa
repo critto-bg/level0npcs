@@ -150,15 +150,17 @@ END
 
 //
 // Asks where the thief skill points go, 5 per pick, until none is left.
-// The menu lists the seven skills with the points placed so far.
+// The menu lists the usable skills with the points placed so far.
 // Input:
-//     points   the points to place, a multiple of 5
+//     points                the points to place, a multiple of 5
+//     count                 the usable skills
+//     $c5_usable_skill(n)   skill number, 1 to 7
 // Output:
 //     choice            0 back, 1 placed
 //     $c5_skill(1..7)   the points per skill, in menu order
 //
 DEFINE_ACTION_FUNCTION c5_skill_prompt
-  INT_VAR points = 0
+  INT_VAR points = 0 count = 0
   RET choice
   RET_ARRAY c5_skill
 BEGIN
@@ -169,18 +171,20 @@ BEGIN
 
   OUTER_SET c5_skill_points_left = points
   OUTER_WHILE (c5_skill_points_left > 0) AND (choice = 1) BEGIN
-    OUTER_FOR (i = 1; i <= 7; i += 1) BEGIN
-      OUTER_SPRINT c5_skill_name $c5_skill_names(~%i%~)
-      OUTER_SET c5_skill_value = $c5_skill(~%i%~)
+    OUTER_FOR (i = 1; i <= count; i += 1) BEGIN
+      OUTER_SET skill = $c5_usable_skill(~%i%~)
+      OUTER_SPRINT c5_skill_name $c5_skill_names(~%skill%~)
+      OUTER_SET c5_skill_value = $c5_skill(~%skill%~)
       OUTER_SPRINT $c5_menu_item(~%i%~) @216
     END
 
     OUTER_SPRINT prompt @215
-    LAF c5_menu INT_VAR count = 7 allow_zero = 1 STR_VAR prompt = EVAL ~%prompt%~ RET pick = choice END
+    LAF c5_menu INT_VAR count = count allow_zero = 1 STR_VAR prompt = EVAL ~%prompt%~ RET pick = choice END
     ACTION_IF (pick = 0) BEGIN
       OUTER_SET choice = 0
     END ELSE BEGIN
-      OUTER_SET $c5_skill(~%pick%~) = $c5_skill(~%pick%~) + 5
+      OUTER_SET skill = $c5_usable_skill(~%pick%~)
+      OUTER_SET $c5_skill(~%skill%~) = $c5_skill(~%skill%~) + 5
       OUTER_SET c5_skill_points_left -= 5
     END
   END

@@ -24,9 +24,10 @@ OUTER_SPRINT $c5_avatar_group(~SORCERER~) ~MAGE~
 OUTER_SPRINT $c5_avatar_group(~MONK~) ~MONK~
 OUTER_SPRINT $c5_avatar_group(~SHAMAN~) ~CLERIC~
 
-// CRE offset of each thief skill, in the order of the CharGen screen:
-// Open Locks, Find Traps, Pick Pockets, Move Silently, Hide In Shadows,
-// Detect Illusion, Set Traps. $c5_skill_names(i) holds the names.
+// CRE offset and thiefscl row of each thief skill, in the order of the
+// CharGen screen: Open Locks, Find Traps, Pick Pockets, Move Silently,
+// Hide In Shadows, Detect Illusion, Set Traps. $c5_skill_names(i) holds
+// the names.
 OUTER_SET $c5_skill_offset(~1~) = 0x67
 OUTER_SET $c5_skill_offset(~2~) = 0x69
 OUTER_SET $c5_skill_offset(~3~) = 0x6a
@@ -35,10 +36,18 @@ OUTER_SET $c5_skill_offset(~5~) = 0x45
 OUTER_SET $c5_skill_offset(~6~) = 0x64
 OUTER_SET $c5_skill_offset(~7~) = 0x65
 
+OUTER_SPRINT $c5_skill_label(~1~) ~OPEN_LOCKS~
+OUTER_SPRINT $c5_skill_label(~2~) ~FIND_TRAPS~
+OUTER_SPRINT $c5_skill_label(~3~) ~PICK_POCKETS~
+OUTER_SPRINT $c5_skill_label(~4~) ~MOVE_SILENTLY~
+OUTER_SPRINT $c5_skill_label(~5~) ~HIDE_IN_SHADOWS~
+OUTER_SPRINT $c5_skill_label(~6~) ~DETECT_ILLUSION~
+OUTER_SPRINT $c5_skill_label(~7~) ~SET_TRAPS~
+
 //
-// Loads kittable, kitlist, haterace and thiefskl, sets $c5_class_names(id)
-// and $c5_skill_names(1..7), and collects the innates the class and kit
-// ability tables grant.
+// Loads kittable, kitlist, haterace, thiefskl and thiefscl, sets
+// $c5_class_names(id) and $c5_skill_names(1..7), and collects the
+// innates the class and kit ability tables grant.
 //
 // Class and skill names come from the tra. Kit names come from kitlist.
 //
@@ -46,12 +55,14 @@ OUTER_SET $c5_skill_offset(~7~) = 0x65
 // is a kitlist row number, 0 for the true class.
 // haterace lists the racial enemies a ranger can choose.
 // thiefskl gives the skill points of a class or kit.
+// thiefscl gives the percentage of each thief skill per class and kit,
+// 0 for a skill the class or kit cannot use.
 //
 // $c5_clab_spells(RESREF) is set for every GA_ entry of the clab*.2da
 // tables.
 //
 DEFINE_ACTION_MACRO c5_load_tables BEGIN
-  ACTION_FOR_EACH c5_table IN ~kittable~ ~kitlist~ ~haterace~ ~thiefskl~ BEGIN
+  ACTION_FOR_EACH c5_table IN ~kittable~ ~kitlist~ ~haterace~ ~thiefskl~ ~thiefscl~ BEGIN
     LAM c5_load_2da
   END
 
@@ -302,10 +313,17 @@ DEFINE_ACTION_MACRO c5_choose BEGIN
         RET c5_skill_points = points c5_skill_level_points = level_points
       END
 
+      LAF c5_thiefscl_skills
+        STR_VAR
+          class_label = EVAL ~%c5_chosen_class_label%~
+          kit_label = EVAL ~%c5_chosen_kit_label%~
+        RET c5_usable_skill_count = count RET_ARRAY c5_usable_skill
+      END
+
       OUTER_SET c5_chosen_skills = 0
       OUTER_SET c5_step = 6
-      ACTION_IF (c5_skill_points > 0) BEGIN
-        LAF c5_skill_prompt INT_VAR points = c5_skill_points RET c5_choice = choice RET_ARRAY c5_skill END
+      ACTION_IF (c5_skill_points > 0) AND (c5_usable_skill_count > 0) BEGIN
+        LAF c5_skill_prompt INT_VAR points = c5_skill_points count = c5_usable_skill_count RET c5_choice = choice RET_ARRAY c5_skill END
         ACTION_IF (c5_choice = 0) BEGIN
           OUTER_SET c5_step = (c5_chosen_ranger ? 4 : 3)
         END ELSE BEGIN
@@ -344,6 +362,38 @@ BEGIN
     LAF c5_lookup_cell STR_VAR table = ~thiefskl~ row = EVAL ~%row%~ col = ~LEVEL_POINTS~ RET level_points = value END
     ACTION_IF IS_AN_INT ~start_points~ AND IS_AN_INT ~level_points~ AND (start_points > level_points) BEGIN
       OUTER_SET points = start_points - level_points
+    END
+  END
+END
+
+//
+// The thief skills the class or kit can use: the skills whose thiefscl
+// cell is above 0 in the column of the kit, else of the class. The
+// engine scales a skill by that cell and 0 disables it. A kit without
+// a column gets the class column.
+//
+// Output:
+//     count
+//     $c5_usable_skill(n)   skill number, 1 to 7, in menu order
+//
+DEFINE_ACTION_FUNCTION c5_thiefscl_skills
+  STR_VAR class_label = ~~ kit_label = ~~
+  RET count
+  RET_ARRAY c5_usable_skill
+BEGIN
+  OUTER_SET count = 0
+  OUTER_SPRINT col ~%kit_label%~
+  LAF c5_lookup_cell STR_VAR table = ~thiefscl~ row = ~OPEN_LOCKS~ col = EVAL ~%col%~ RET found END
+  ACTION_IF NOT found BEGIN
+    OUTER_SPRINT col ~%class_label%~
+  END
+
+  OUTER_FOR (i = 1; i <= 7; i += 1) BEGIN
+    OUTER_SPRINT row $c5_skill_label(~%i%~)
+    LAF c5_lookup_cell STR_VAR table = ~thiefscl~ row = EVAL ~%row%~ col = EVAL ~%col%~ RET scale = value found END
+    ACTION_IF found AND IS_AN_INT ~scale~ AND (scale > 0) BEGIN
+      OUTER_SET count += 1
+      OUTER_SET $c5_usable_skill(~%count%~) = i
     END
   END
 END

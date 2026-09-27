@@ -22,7 +22,7 @@ Only true classes are allowed when choosing a multi-class, with the exception of
 
 Ability scores range from 3 to 25. The mod does not enforce racial or class minimums and maximums. A warrior with Strength 18 is asked for the exceptional strength value. Scores you leave untouched keep their original values, exceptional strength included.
 
-Thieving skill points come in two parts. Character creation hands out more points than any level-up does (e.g., 40 compared to 25 for unkitted thieves). The mod compensates for the difference during installation according to the preset of the chosen kit or class. The first level-up from level 0 to 1 then adds its own points for you to place, and the game applies the race and Dexterity bonuses on top.
+Thieving skill points come in two parts. Character creation hands out more points than any level-up does (e.g., 40 compared to 25 for unkitted thieves). The mod compensates for the difference during installation according to the preset of the chosen kit or class. The first level-up from level 0 to 1 then adds its own points for you to place, and the game applies the race and Dexterity bonuses on top. The menu only offers the skills the chosen class or kit can use.
 
 Weapon proficiencies are entirely yours to pick during the first level-up, within the limits of the new class. The mod adds none on top, with the exception of the ranger's complimentary stars in two-weapon fighting.
 
