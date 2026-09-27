@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/critto-bg/level0npcs/compare/v1.1.0...v1.1.1) (2026-09-27)
+
+
+### Bug Fixes
+
+* offer the thief skills the class or kit can use ([5bc6f3d](https://github.com/critto-bg/level0npcs/commit/5bc6f3d6401738c34a5f696fdfe6e8dbb6bf9d85))
+
 ## [1.1.0](https://github.com/critto-bg/level0npcs/compare/v1.0.0...v1.1.0) (2026-09-26)
 
 
