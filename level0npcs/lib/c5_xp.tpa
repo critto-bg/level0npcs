@@ -1,5 +1,5 @@
-// XP match: the shared files and the creature effect that summons the
-// helper once the NPC has a level.
+// XP match: the shared files, the creature effect that summons the
+// helper once the NPC has a level, and the XP match on join.
 //
 // The chain: opcode 272 on the NPC applies c5xpchk.eff once per round.
 // Its opcode 326 casts c5xpgo.spl when the NPC matches the splprot.2da
@@ -7,6 +7,11 @@
 // the parent resource tag) and summons c5xp.cre (opcode 67 through
 // c5xpsum.eff), which runs c5xp.bcs: the ladder that raises the NPC's
 // XP to the protagonist's.
+//
+// The XP match on join casts c5xpjoin.spl ahead of every JoinParty():
+// one opcode 177 that applies c5xpchk.eff. A level 0 NPC gets nothing
+// and its opcode 272 fires at the level-up. A leveled NPC gets c5xpgo.spl,
+// whose opcode 321 now has nothing to remove.
 
 //
 // Adds the splprot.2da row, copies the helper creature, the effect files
@@ -123,5 +128,120 @@ BEGIN
         END
       END
     END
+  END
+END
+
+//
+// Enables the XP match on join for every joinable, and disables
+// the pre-existing XP-on-join features off for every joinable.
+//
+// Input:
+//     again  when set to 1, patches the rejoin dialogues and scripts too
+//
+DEFINE_ACTION_FUNCTION c5_xp_on_join
+  INT_VAR again = 0
+BEGIN
+  COPY ~%MOD_FOLDER%/resources/c5xpjoin.spl~ ~override~
+
+  ACTION_IF GAME_IS ~bgee eet~ BEGIN
+    LAF c5_patch_join_files INT_VAR again = again STR_VAR game = ~bg1~ END
+  END
+  ACTION_IF GAME_INCLUDES ~sod~ BEGIN
+    LAF c5_patch_join_files INT_VAR again = again STR_VAR game = ~sod~ END
+  END
+  ACTION_IF GAME_IS ~bg2ee eet~ BEGIN
+    LAF c5_patch_join_files INT_VAR again = again STR_VAR game = ~bg2~ END
+  END
+
+  OUTER_SET npcs_count = 0
+  OUTER_PATCH ~%c5_joinables%~ BEGIN
+    REPLACE_EVALUATE ~\([^ %TAB%%LNL%%WNL%]+\)~ BEGIN
+      SPRINT $npcs(~%npcs_count%~) ~%MATCH1%~
+      SET npcs_count += 1
+    END ~~
+  END
+
+  OUTER_FOR (i = 0; i < npcs_count; i += 1) BEGIN
+    OUTER_SPRINT npc $npcs(~%i%~)
+    LAF c5_npc_files STR_VAR npc = EVAL ~%npc%~ RET cres END
+    LAF c5_disable_joinxp STR_VAR cres = EVAL ~%cres%~ END
+    LAF c5_mods_joinxp STR_VAR cres = EVAL ~%cres%~ END
+  END
+END
+
+//
+// Puts the join spell ahead of every JoinParty() of one game's join
+// dialogues and scripts.
+//
+// Input:
+//     game   bg1, sod or bg2
+//     again  when set to 1, takes the rejoin list too
+//
+DEFINE_ACTION_FUNCTION c5_patch_join_files
+  INT_VAR again = 0
+  STR_VAR game = ~~
+BEGIN
+  OUTER_SPRINT listed $c5_joins(~%game%~)
+  ACTION_IF again BEGIN
+    OUTER_SPRINT rejoins $c5_rejoins(~%game%~)
+    OUTER_SPRINT listed ~%listed% %rejoins%~
+  END
+
+  OUTER_SET entries_count = 0
+  OUTER_PATCH ~%listed%~ BEGIN
+    REPLACE_EVALUATE ~\([^ %TAB%%LNL%%WNL%.]+\)\.\([a-z]+\)~ BEGIN
+      SPRINT $entry_names(~%entries_count%~) ~%MATCH1%~
+      SPRINT $entry_exts(~%entries_count%~) ~%MATCH2%~
+      SET entries_count += 1
+    END ~~
+  END
+
+  OUTER_FOR (i = 0; i < entries_count; i += 1) BEGIN
+    OUTER_SPRINT name $entry_names(~%i%~)
+    OUTER_SPRINT ext $entry_exts(~%i%~)
+    LAF c5_patch_join_file STR_VAR name = EVAL ~%name%~ ext = EVAL ~%ext%~ END
+    ACTION_IF GAME_IS ~eet~ AND NOT (~%game%~ STR_EQ ~bg2~) BEGIN
+      LAF c5_patch_join_file STR_VAR name = EVAL ~%name%_~ ext = EVAL ~%ext%~ END
+    END
+  END
+END
+
+//
+// Puts the join spell ahead of every JoinParty() of one dialogue or
+// script, if present.
+//
+// Input:
+//     name  the resref
+//     ext   dlg or bcs
+//
+DEFINE_ACTION_FUNCTION c5_patch_join_file
+  STR_VAR name = ~~ ext = ~~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%name%.%ext%~ BEGIN
+    ACTION_IF (~%ext%~ STR_EQ ~dlg~) BEGIN
+      COPY_EXISTING ~%name%.dlg~ ~override~
+        DECOMPILE_DLG_TO_D
+          LPF c5_append_join_casts END
+        COMPILE_D_TO_DLG
+      BUT_ONLY
+    END ELSE BEGIN
+      COPY_EXISTING ~%name%.bcs~ ~override~
+        DECOMPILE_BCS_TO_BAF
+          LPF c5_append_join_casts END
+        COMPILE_BAF_TO_BCS
+      BUT_ONLY
+    END
+  END
+END
+
+//
+// Puts ReallyForceSpellRes("c5xpjoin",Myself) ahead of every
+// JoinParty() and JoinPartyOverride() in the dialogue or script source
+// in the buffer, source has one already.
+//
+DEFINE_PATCH_FUNCTION c5_append_join_casts BEGIN
+  PATCH_IF (INDEX_BUFFER (~c5xpjoin~) < 0) BEGIN
+    REPLACE_TEXTUALLY ~\([^,a-zA-Z0-9_]\)JoinParty\(Override\|\)()~ ~\1ReallyForceSpellRes("c5xpjoin",Myself) JoinParty\2()~
+    REPLACE_TEXTUALLY ~ActionOverride(\([^,]+\),JoinParty\(Override\|\)())~ ~ActionOverride(\1,ReallyForceSpellRes("c5xpjoin",Myself)) ActionOverride(\1,JoinParty\2())~
   END
 END

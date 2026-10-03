@@ -23,6 +23,7 @@ ALWAYS
   INCLUDE ~%MOD_FOLDER%/lib/c5_xp.tpa~
   INCLUDE ~%MOD_FOLDER%/lib/c5_mods.tpa~
   INCLUDE ~%MOD_FOLDER%/lib/c5_npc.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/c5_joinables.tpa~
 
   LAM c5_load_tables
   LAM c5_load_spells
@@ -51,7 +52,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @100
 LAF c5_update_npc
   STR_VAR
-    bg2 = ~aerie6 aerie7 aerie9 aerie10 aerie11 aerie12~
+    npc = ~aerie~
   RET c5_avatar = avatar
 END
 LAF c5_aerie_true_form STR_VAR avatar = EVAL ~%c5_avatar%~ END
@@ -70,7 +71,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @101
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~ajanti ajanti4 ajanti6~
+    npc = ~ajantis~
 END
 
 // Alora //
@@ -85,7 +86,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @102
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~alora alora6~
+    npc = ~alora~
 END
 
 // Anomen //
@@ -100,7 +101,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @103
 LAF c5_update_npc
   STR_VAR
-    bg2 = ~anomen6 anomen7 anomen8 anomen9 anomen10 anomen12~
+    npc = ~anomen~
     personal = ~npshld~
 END
 
@@ -117,8 +118,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @104
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~baeloth~
-    sod = ~baelot7~
+    npc = ~baeloth~
 END
 
 // Branwen //
@@ -133,7 +133,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @105
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~branwe branwe5~
+    npc = ~branwen~
 END
 
 // Cernd //
@@ -148,7 +148,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @106
 LAF c5_update_npc
   STR_VAR
-    bg2 = ~cernd10 cernd12 cernd13 cernd13b cernd14~
+    npc = ~cernd~
     personal = ~npclck npstaf~
 END
 
@@ -164,7 +164,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @107
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~coran coran5~
+    npc = ~coran~
 END
 
 // Corwin //
@@ -179,7 +179,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @108
 LAF c5_update_npc
   STR_VAR
-    sod = ~corwin7~
+    npc = ~corwin~
     kit_effects = ~167 286~
 END
 
@@ -197,9 +197,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @109
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~dorn dorn2 dorn4 dorn6~
-    sod = ~dorn7~
-    bg2 = ~dorn8 dorn9 dorn10 dorn12 dorn14~
+    npc = ~dorn~
     kit_effects = ~206 267 296 101 142 169 282~
 END
 LAF c5_dorn_ambush END
@@ -217,8 +215,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @110
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~dynahe dynahe2 dynahe4 dynahe6~
-    sod = ~dynahe7~
+    npc = ~dynaheir~
   RET chosen_class chosen_kitids
 END
 LAF c5_sod_intro_gear INT_VAR class_id = chosen_class kitids = chosen_kitids STR_VAR name = ~dynaheir~ item = ~ring08~ END
@@ -237,9 +234,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @111
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~edwin edwin2 edwin4 edwin6~
-    sod = ~edwin7~
-    bg2 = ~edwin7 edwin9 edwin11 edwin12 edwin13 edwin15~
+    npc = ~edwin~
   RET chosen_class chosen_kitids
 END
 LAF c5_sod_intro_gear INT_VAR class_id = chosen_class kitids = chosen_kitids STR_VAR name = ~edwin~ item = ~ring08~ END
@@ -256,7 +251,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @112
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~eldoth eldoth5~
+    npc = ~eldoth~
     personal = ~arow14~
 END
 
@@ -272,7 +267,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @113
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~faldor faldor5~
+    npc = ~faldorn~
 END
 
 // Garrick //
@@ -287,7 +282,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @114
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~garric garric2 garric4 garric6~
+    npc = ~garrick~
 END
 
 // Glint //
@@ -302,7 +297,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @115
 LAF c5_update_npc
   STR_VAR
-    sod = ~glint7~
+    npc = ~glint~
 END
 
 // Haer'Dalis //
@@ -317,7 +312,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @116
 LAF c5_update_npc
   STR_VAR
-    bg2 = ~haer10 haer11 haer13 haer15 haer19~
+    npc = ~haerdalis~
     personal = ~npsw05 npsw06~
 END
 
@@ -333,7 +328,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @117
 LAF c5_update_npc
   STR_VAR
-    bg2 = ~ohhex8 ohhex9 ohhex10 ohhex11 ohhex13 ohhex15 ohhex25~
+    npc = ~hexxat~
 END
 LAF c5_hexxat_mist END
 LAF c5_hexxat_join_xp END
@@ -351,8 +346,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @118
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~imoen1 imoen2 imoen4 imoen6~
-    bg2 = ~imoen6 imoen10 imoen211 imoen213 imoen15~
+    npc = ~imoen~
 END
 
 // Jaheira //
@@ -369,9 +363,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @119
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~jaheir jaheir2 jaheir4 jaheir6~
-    sod = ~jaheir7~
-    bg2 = ~jaheir7 jaheir8 jaheir11 jaheir12 jahei12b jahei14~
+    npc = ~jaheira~
   RET chosen_class chosen_kitids
 END
 LAF c5_sod_intro_gear INT_VAR class_id = chosen_class kitids = chosen_kitids STR_VAR name = ~jaheira~ item = ~ring22~ END
@@ -389,7 +381,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @120
 LAF c5_update_npc
   STR_VAR
-    bg2 = ~jan8 jan10 jan11 jan12 jan15~
+    npc = ~jan~
     personal = ~nparm npmisc1 npmisc2 xbow12 bolt07~
 END
 
@@ -405,7 +397,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @121
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~kagain kagain2 kagain4 kagain6~
+    npc = ~kagain~
 END
 
 // Keldorn //
@@ -420,7 +412,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @122
 LAF c5_update_npc
   STR_VAR
-    bg2 = ~keldor8 keldor9 keldor10 keldor12 keldor14~
+    npc = ~keldorn~
     personal = ~npplat npsw03~
 END
 
@@ -437,8 +429,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @123
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~khalid khalid2 khalid4 khalid6~
-    sod = ~khalid7~
+    npc = ~khalid~
   RET chosen_class chosen_kitids
 END
 LAF c5_sod_intro_gear INT_VAR class_id = chosen_class kitids = chosen_kitids STR_VAR name = ~khalid~ item = ~brac06~ END
@@ -455,7 +446,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @124
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~kivan kivan4 kivan6~
+    npc = ~kivan~
 END
 
 // Korgan //
@@ -470,7 +461,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @125
 LAF c5_update_npc
   STR_VAR
-    bg2 = ~korgan8 korgan9 korgan11 korgan12 korgan15~
+    npc = ~korgan~
 END
 
 // Mazzy //
@@ -485,7 +476,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @126
 LAF c5_update_npc
   STR_VAR
-    bg2 = ~mazzy8 mazzy9 mazzy11 mazzy12 mazzy15~
+    npc = ~mazzy~
     personal = ~npbow npsw01~
 END
 LAF c5_mazzy_arvoreen END
@@ -504,9 +495,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @127
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~minsc minsc2 minsc4 minsc6~
-    sod = ~minsc7~
-    bg2 = ~minsc7 minsc8 minsc9 minsc10 minsc12 minsc14~
+    npc = ~minsc~
 END
 
 // M'Khiin //
@@ -521,7 +510,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @128
 LAF c5_update_npc
   STR_VAR
-    sod = ~bdmkhi7~
+    npc = ~mkhiin~
     kit_effects = ~251~
 END
 
@@ -537,7 +526,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @129
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~montar montar2 montar4 montar6~
+    npc = ~montaron~
 END
 
 // Nalia //
@@ -552,7 +541,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @130
 LAF c5_update_npc
   STR_VAR
-    bg2 = ~nalia8 nalia10 nalia11 nalia13 nalia15 nalia18~
+    npc = ~nalia~
 END
 LAF c5_hurt_banter STR_VAR object = ~"Nalia"~ hp = ~10~ END
 
@@ -570,9 +559,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @131
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~neera neera2 neera4 neera6~
-    sod = ~neera7~
-    bg2 = ~neera8 neera10 neera11 neera12 neera13 neera15~
+    npc = ~neera~
     personal = ~stafn1~
   RET chosen_class chosen_kitids
 END
@@ -591,7 +578,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @132
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~quayle quayle4 quayle6~
+    npc = ~quayle~
 END
 
 // Rasaad //
@@ -608,9 +595,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @133
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~rasaad rasaad2 rasaad4 rasaad6~
-    sod = ~rasaad7~
-    bg2 = ~rasaad8 rasaad9 rasaad10 rasaad11 rasaad13 rasaad12~
+    npc = ~rasaad~
     kit_effects = ~176 267 169 206 101 190 173 142 296~
 END
 
@@ -627,8 +612,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @134
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~safana safana4 safana6~
-    sod = ~safana7~
+    npc = ~safana~
   RET chosen_class chosen_kitids
 END
 LAF c5_sod_intro_gear INT_VAR class_id = chosen_class kitids = chosen_kitids STR_VAR name = ~safana~ item = ~ring05~ END
@@ -645,7 +629,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @135
 LAF c5_update_npc
   STR_VAR
-    bg2 = ~sarevok~
+    npc = ~sarevok~
 END
 
 // Shar-Teel //
@@ -660,7 +644,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @136
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~sharte sharte4 sharte6~
+    npc = ~sharteel~
 END
 LAF c5_sharteel_duel END
 
@@ -676,7 +660,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @137
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~skie skie6~
+    npc = ~skie~
 END
 
 // Tiax //
@@ -691,7 +675,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @138
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~tiax tiax4 tiax6~
+    npc = ~tiax~
 END
 
 // Valygar //
@@ -706,7 +690,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @139
 LAF c5_update_npc
   STR_VAR
-    bg2 = ~valyg8 valyg9 valyg11 valyg12 valyg14~
+    npc = ~valygar~
     personal = ~npsw04 npchan~
 END
 
@@ -724,9 +708,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @140
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~viconi viconi4 viconi6~
-    sod = ~viconi7~
-    bg2 = ~viconi6 viconi8 viconi9 viconi11 viconi13 viconi16~
+    npc = ~viconia~
   RET chosen_class chosen_kitids
 END
 LAF c5_sod_intro_gear INT_VAR class_id = chosen_class kitids = chosen_kitids STR_VAR name = ~viconia~ item = ~ring22~ END
@@ -744,7 +726,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @141
 LAF c5_update_npc
   STR_VAR
-    sod = ~voghil7~
+    npc = ~voghiln~
     kit_effects = ~73 278 251~
 END
 
@@ -760,7 +742,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @142
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~xan xan4 xan6~
+    npc = ~xan~
 END
 
 // Xzar //
@@ -775,7 +757,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @143
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~xzar xzar2 xzar4 xzar6~
+    npc = ~xzar~
 END
 
 // Yeslick //
@@ -790,7 +772,7 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @144
 LAF c5_update_npc
   STR_VAR
-    bg1 = ~yeslic yeslic5~
+    npc = ~yeslick~
 END
 
 // Yoshimo //
@@ -805,23 +787,50 @@ REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
 OUTER_SPRINT c5_npc @145
 LAF c5_update_npc
   STR_VAR
-    bg2 = ~yoshi7 yoshi8 yoshi10 yoshi11 yoshi12~
+    npc = ~yoshimo~
     personal = ~npsw02~
 END
+
+// XP match on join //
+
+BEGIN @7
+LABEL ~C5-LEVEL0NPCS-XPJOIN-FIRST~
+SUBCOMPONENT @6
+GROUP @9 (GAME_IS ~bgee bg2ee eet~)
+DESIGNATED 1
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @10
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+LAF c5_xp_on_join END
+
+BEGIN @8
+LABEL ~C5-LEVEL0NPCS-XPJOIN-EVERY~
+SUBCOMPONENT @6
+GROUP @9 (GAME_IS ~bgee bg2ee eet~)
+DESIGNATED 2
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @10
+REQUIRE_COMPONENT ~level0npcs/setup-level0npcs.tp2~ 0 @13
+
+LAF c5_xp_on_join INT_VAR again = 1 END
 
 // Placeholders that make WeiDU ask about every group //
 
 BEGIN @5
 DEPRECATED @5
-DESIGNATED 97
+DESIGNATED 96
 GROUP @2 (GAME_IS ~bgee eet~)
 
 BEGIN @5
 DEPRECATED @5
-DESIGNATED 98
+DESIGNATED 97
 GROUP @3 (GAME_INCLUDES ~sod~)
 
 BEGIN @5
 DEPRECATED @5
-DESIGNATED 99
+DESIGNATED 98
 GROUP @4 (GAME_IS ~bg2ee eet~)
+
+BEGIN @5
+DEPRECATED @5
+DESIGNATED 99
+GROUP @9 (GAME_IS ~bgee bg2ee eet~)

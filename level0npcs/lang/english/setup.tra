@@ -10,6 +10,10 @@
 @3   = ~Siege of Dragonspear NPCs~
 @4   = ~Baldur's Gate II NPCs~
 @5   = ~Placeholder~
+@6   = ~Joinable NPCs match the protagonist's XP when they join~
+@7   = ~On the first join only~
+@8   = ~On every join~
+@9   = ~Optional components~
 @10  = ~This component needs Baldur's Gate: Enhanced Edition, Baldur's Gate II: Enhanced Edition or EET.~
 @11  = ~None of the creature files of %c5_npc% is in the game.~
 @12  = ~Not in the game, skipped:%c5_missing%~
