@@ -34,6 +34,12 @@ Personal items, the gear the game reserves for a single character, stay usable b
 
 The mod does not provide means to set up dual-class combinations of a specific, predefined configuration. Regular dual-classing in-game would still work, of course, if the character fits the necessary requirements (race, alignment, base and target class, etc.)
 
+## Match the protagonist's XP on join
+
+The optional component "Joinable NPCs match the protagonist's XP when they join" extends the XP helper to every joinable character, re-specced or not. The moment a character joins the party, the helper raises their experience points to your protagonist's, the way it does after the first level-up from level 0. A re-specced character still joins at level 0 and gets the match after the first level-up, as before. The game's own joining XP bonus (see [Game quirks](#game-quirks), point 2) is switched off for every joinable character, since the component replaces it.
+
+The component comes in two flavours. "On the first join only" covers the dialogues and scripts that bring a character into the party for the first time. "On every join" also covers the ones that bring a character back after you dismissed them. In Siege of Dragonspear one dialogue file serves both purposes, so there the two variants behave the same. Wilson is covered, Clara, Caelar and the tutorial characters are not.
+
 ## Installation
 
 Level 0 NPCs is a regular WeiDU mod that ships with the WeiDU binary appropriate for the chosen platform and architecture.
@@ -74,7 +80,7 @@ Mods with their own take on the joinable characters that Level 0 NPCs knows abou
 
 ### Improved Anvil
 
-[Improved Anvil](https://github.com/critto-bg/improvedanvil) gives each joinable character experience points when they join, so that they keep up with the protagonist. For a character you re-spec, Level 0 NPCs removes this mechanism and uses its own instead. Otherwise the experience points would arrive before the character's first level-up and skip the proficiency choices of that level.
+[Improved Anvil](https://github.com/critto-bg/improvedanvil) gives each joinable character experience points when they join, so that they keep up with the protagonist. For a character you re-spec, Level 0 NPCs removes this mechanism and uses its own instead. Otherwise the experience points would arrive before the character's first level-up and skip the proficiency choices of that level. With the XP match on join component, the same applies to every joinable character.
 
 Improved Anvil's smiths forge upgraded versions of the personal items. For a character you re-spec, those follow the personal items: any class and kit can use them, and they stay locked to their owner. The alignment and ability score requirements Improved Anvil puts on some of them remain untouched.
 
@@ -88,7 +94,7 @@ This section lists a variety of game quirks, and the ways the mod handles them. 
 
 1. **I recommend starting a new game.** The game embeds a copy of every joinable character (with some exceptions) into the save the moment a new game starts. It may then re-read the character from the game files according to a special table, based on the average level of your party. This works in BG:EE and BG2:EE alike. The EET enforces this behavior for the purposes of continuity. There's no guarantee that changes made to a character mid-playthrough will appear in your game.
 
-2. The joining XP bonus is disabled. When a character joins the party, their own script normally sets their XP to a fixed tier based on the XP of your protagonist. A level 0 character would jump several levels at once and skip `Level0->1` entirely. The mod switches this off for every re-specced character and lets its own XP helper do the job instead.
+2. The joining XP bonus is disabled. When a character joins the party, their own script normally sets their XP to a fixed tier based on the XP of your protagonist. A level 0 character would jump several levels at once and break the `Level0->1` process. The mod switches this off for every re-specced character, and with the XP match on join component for every joinable character, and lets its own XP helper do the job instead.
 
 3. The mod moves any gear the new class or kit cannot use to the inventory during installation. The weapons that remain are packed into the quick weapon slots, as many as the new class or kit gets, and the rest go to the inventory as well. The weapon in the first slot becomes the selected one.
 

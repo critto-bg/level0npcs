@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc 3.11" />
+  <meta name="generator" content="pandoc 3.12" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Level 0 NPCs</title>
   <style>
@@ -407,6 +407,23 @@ stay usable by that character under any class or kit.</p>
 specific, predefined configuration. Regular dual-classing in-game would
 still work, of course, if the character fits the necessary requirements
 (race, alignment, base and target class, etc.)</p>
+<h1 id="match-the-protagonists-xp-on-join">Match the protagonist&#39;s XP on
+join</h1>
+<p>The optional component &quot;Joinable NPCs match the protagonist&#39;s XP when
+they join&quot; extends the XP helper to every joinable character, re-specced
+or not. The moment a character joins the party, the helper raises their
+experience points to your protagonist&#39;s, the way it does after the first
+level-up from level 0. A re-specced character still joins at level 0 and
+gets the match after the first level-up, as before. The game&#39;s own
+joining XP bonus (see <a href="#game-quirks">Game quirks</a>, point 2)
+is switched off for every joinable character, since the component
+replaces it.</p>
+<p>The component comes in two flavours. &quot;On the first join only&quot; covers
+the dialogues and scripts that bring a character into the party for the
+first time. &quot;On every join&quot; also covers the ones that bring a character
+back after you dismissed them. In Siege of Dragonspear one dialogue file
+serves both purposes, so there the two variants behave the same. Wilson
+is covered, Clara, Caelar and the tutorial characters are not.</p>
 <h1 id="installation">Installation</h1>
 <p>Level 0 NPCs is a regular WeiDU mod that ships with the WeiDU binary
 appropriate for the chosen platform and architecture.</p>
@@ -466,7 +483,8 @@ experience points when they join, so that they keep up with the
 protagonist. For a character you re-spec, Level 0 NPCs removes this
 mechanism and uses its own instead. Otherwise the experience points
 would arrive before the character&#39;s first level-up and skip the
-proficiency choices of that level.</p>
+proficiency choices of that level. With the XP match on join component,
+the same applies to every joinable character.</p>
 <p>Improved Anvil&#39;s smiths forge upgraded versions of the personal
 items. For a character you re-spec, those follow the personal items: any
 class and kit can use them, and they stay locked to their owner. The
@@ -495,8 +513,9 @@ game.</p></li>
 <li><p>The joining XP bonus is disabled. When a character joins the
 party, their own script normally sets their XP to a fixed tier based on
 the XP of your protagonist. A level 0 character would jump several
-levels at once and skip <code>Level0-&gt;1</code> entirely. The mod
-switches this off for every re-specced character and lets its own XP
+levels at once and break the <code>Level0-&gt;1</code> process. The mod
+switches this off for every re-specced character, and with the XP match
+on join component for every joinable character, and lets its own XP
 helper do the job instead.</p></li>
 <li><p>The mod moves any gear the new class or kit cannot use to the
 inventory during installation. The weapons that remain are packed into
