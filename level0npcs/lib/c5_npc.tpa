@@ -29,6 +29,37 @@ BEGIN
 END
 
 //
+// The creature files of a joinable in the games at hand: bg1 on BG:EE
+// and EET, sod when the game includes SoD, bg2 on BG2:EE and EET, with
+// the EET names (lib/c5_joinables.tpa).
+//
+// Input:
+//     npc   the NPC's key in c5_cres
+// Returns:
+//     cres  the resrefs without .cre, separated by spaces
+//
+DEFINE_ACTION_FUNCTION c5_npc_files
+  STR_VAR npc = ~~
+  RET cres
+BEGIN
+  OUTER_SPRINT cres ~~
+  ACTION_IF GAME_IS ~bgee eet~ AND VARIABLE_IS_SET $c5_cres(~%npc%~ ~bg1~) BEGIN
+    LAF c5_eet_names STR_VAR cres = EVAL $c5_cres(~%npc%~ ~bg1~) RET renamed END
+    OUTER_SPRINT cres ~%cres% %renamed%~
+  END
+
+  ACTION_IF GAME_INCLUDES ~sod~ AND VARIABLE_IS_SET $c5_cres(~%npc%~ ~sod~) BEGIN
+    LAF c5_eet_names STR_VAR cres = EVAL $c5_cres(~%npc%~ ~sod~) RET renamed END
+    OUTER_SPRINT cres ~%cres% %renamed%~
+  END
+
+  ACTION_IF GAME_IS ~bg2ee eet~ AND VARIABLE_IS_SET $c5_cres(~%npc%~ ~bg2~) BEGIN
+    OUTER_SPRINT bg2 $c5_cres(~%npc%~ ~bg2~)
+    OUTER_SPRINT cres ~%cres% %bg2%~
+  END
+END
+
+//
 // Runs the class, kit, ability score, racial enemy and thief skill
 // selection for a single NPC, opens its personal items to every class,
 // then resets every creature file, writes the scores and skill points
@@ -38,15 +69,12 @@ END
 //
 // Input:
 //     c5_npc    the NPC's display name, set by the caller
-//     bg1       the NPC's BG1 resrefs without .cre, separated by spaces
-//     sod       the SoD resrefs
-//     bg2       the BG2 and ToB resrefs
+//     npc       the NPC's key in c5_cres (lib/c5_joinables.tpa)
 //     personal  the NPC's personal items without .itm
 //  kit_effects  the opcodes of the kit effects baked into the files
 //
-// The lists of the games at hand are used: bg1 on BG:EE and EET, sod
-// when the game includes SoD, bg2 on BG2:EE and EET. An unmerged SoD
-// is reported. Files that are not in the game are skipped.
+// The files of the games at hand are used (c5_npc_files). An unmerged
+// SoD is reported. Files that are not in the game are skipped.
 // When none is in the game the component fails.
 // The first file found is the reference for race,
 // alignment, scores and the current class.
@@ -57,25 +85,13 @@ END
 //     chosen_kitids  kit.ids value of the kit the player picked
 //
 DEFINE_ACTION_FUNCTION c5_update_npc
-  STR_VAR bg1 = ~~ sod = ~~ bg2 = ~~ personal = ~~ kit_effects = ~~
+  STR_VAR npc = ~~ personal = ~~ kit_effects = ~~
   RET avatar chosen_class chosen_kitids
 BEGIN
-  // The files of the games split into $listed(n), n from 0.
-  OUTER_SPRINT cres ~~
-  ACTION_IF GAME_IS ~bgee eet~ BEGIN
-    LAF c5_eet_names STR_VAR cres = EVAL ~%bg1%~ RET renamed END
-    OUTER_SPRINT cres ~%cres% %renamed%~
-  END
-
-  ACTION_IF GAME_INCLUDES ~sod~ BEGIN
-    LAF c5_eet_names STR_VAR cres = EVAL ~%sod%~ RET renamed END
-    OUTER_SPRINT cres ~%cres% %renamed%~
-  END ELSE ACTION_IF NOT (~%sod%~ STR_EQ ~~) AND FILE_EXISTS ~dlc/sod-dlc.zip~ BEGIN
+  LAF c5_npc_files STR_VAR npc = EVAL ~%npc%~ RET cres END
+  ACTION_IF NOT GAME_INCLUDES ~sod~ AND VARIABLE_IS_SET $c5_cres(~%npc%~ ~sod~)
+            AND FILE_EXISTS ~dlc/sod-dlc.zip~ BEGIN
     PRINT @14
-  END
-
-  ACTION_IF GAME_IS ~bg2ee eet~ BEGIN
-    OUTER_SPRINT cres ~%cres% %bg2%~
   END
 
   OUTER_SET listed_count = 0

@@ -1,0 +1,139 @@
+// The joinables. The creature files of every stock joinable per game,
+// and the dialogues and scripts that join one to the party, per game.
+
+// Every joinable, the NPC components' order. Wilson has no component.
+OUTER_SPRINT c5_joinables ~aerie ajantis alora anomen baeloth branwen cernd
+                           coran corwin dorn dynaheir edwin eldoth faldorn
+                           garrick glint haerdalis hexxat imoen jaheira jan
+                           kagain keldorn khalid kivan korgan mazzy minsc
+                           mkhiin montaron nalia neera quayle rasaad safana
+                           sarevok sharteel skie tiax valygar viconia
+                           voghiln xan xzar yeslick yoshimo wilson~
+
+// The creature files without .cre, per key and game: bg1 for BG:EE and
+// EET, sod when the game includes SoD, bg2 for BG2:EE and EET.
+ACTION_DEFINE_ASSOCIATIVE_ARRAY c5_cres BEGIN
+  ~aerie~,     ~bg2~ => ~aerie6 aerie7 aerie9 aerie10 aerie11 aerie12~
+  ~ajantis~,   ~bg1~ => ~ajanti ajanti4 ajanti6~
+  ~alora~,     ~bg1~ => ~alora alora6~
+  ~anomen~,    ~bg2~ => ~anomen6 anomen7 anomen8 anomen9 anomen10 anomen12~
+  ~baeloth~,   ~bg1~ => ~baeloth~
+  ~baeloth~,   ~sod~ => ~baelot7~
+  ~branwen~,   ~bg1~ => ~branwe branwe5~
+  ~cernd~,     ~bg2~ => ~cernd10 cernd12 cernd13 cernd13b cernd14~
+  ~coran~,     ~bg1~ => ~coran coran5~
+  ~corwin~,    ~sod~ => ~corwin7~
+  ~dorn~,      ~bg1~ => ~dorn dorn2 dorn4 dorn6~
+  ~dorn~,      ~sod~ => ~dorn7~
+  ~dorn~,      ~bg2~ => ~dorn8 dorn9 dorn10 dorn12 dorn14~
+  ~dynaheir~,  ~bg1~ => ~dynahe dynahe2 dynahe4 dynahe6~
+  ~dynaheir~,  ~sod~ => ~dynahe7~
+  ~edwin~,     ~bg1~ => ~edwin edwin2 edwin4 edwin6~
+  ~edwin~,     ~sod~ => ~edwin7~
+  ~edwin~,     ~bg2~ => ~edwin7 edwin9 edwin11 edwin12 edwin13 edwin15~
+  ~eldoth~,    ~bg1~ => ~eldoth eldoth5~
+  ~faldorn~,   ~bg1~ => ~faldor faldor5~
+  ~garrick~,   ~bg1~ => ~garric garric2 garric4 garric6~
+  ~glint~,     ~sod~ => ~glint7~
+  ~haerdalis~, ~bg2~ => ~haer10 haer11 haer13 haer15 haer19~
+  ~hexxat~,    ~bg2~ => ~ohhex8 ohhex9 ohhex10 ohhex11 ohhex13 ohhex15 ohhex25~
+  ~imoen~,     ~bg1~ => ~imoen1 imoen2 imoen4 imoen6~
+  ~imoen~,     ~bg2~ => ~imoen6 imoen10 imoen211 imoen213 imoen15~
+  ~jaheira~,   ~bg1~ => ~jaheir jaheir2 jaheir4 jaheir6~
+  ~jaheira~,   ~sod~ => ~jaheir7~
+  ~jaheira~,   ~bg2~ => ~jaheir7 jaheir8 jaheir11 jaheir12 jahei12b jahei14~
+  ~jan~,       ~bg2~ => ~jan8 jan10 jan11 jan12 jan15~
+  ~kagain~,    ~bg1~ => ~kagain kagain2 kagain4 kagain6~
+  ~keldorn~,   ~bg2~ => ~keldor8 keldor9 keldor10 keldor12 keldor14~
+  ~khalid~,    ~bg1~ => ~khalid khalid2 khalid4 khalid6~
+  ~khalid~,    ~sod~ => ~khalid7~
+  ~kivan~,     ~bg1~ => ~kivan kivan4 kivan6~
+  ~korgan~,    ~bg2~ => ~korgan8 korgan9 korgan11 korgan12 korgan15~
+  ~mazzy~,     ~bg2~ => ~mazzy8 mazzy9 mazzy11 mazzy12 mazzy15~
+  ~minsc~,     ~bg1~ => ~minsc minsc2 minsc4 minsc6~
+  ~minsc~,     ~sod~ => ~minsc7~
+  ~minsc~,     ~bg2~ => ~minsc7 minsc8 minsc9 minsc10 minsc12 minsc14~
+  ~mkhiin~,    ~sod~ => ~bdmkhi7~
+  ~montaron~,  ~bg1~ => ~montar montar2 montar4 montar6~
+  ~nalia~,     ~bg2~ => ~nalia8 nalia10 nalia11 nalia13 nalia15 nalia18~
+  ~neera~,     ~bg1~ => ~neera neera2 neera4 neera6~
+  ~neera~,     ~sod~ => ~neera7~
+  ~neera~,     ~bg2~ => ~neera8 neera10 neera11 neera12 neera13 neera15~
+  ~quayle~,    ~bg1~ => ~quayle quayle4 quayle6~
+  ~rasaad~,    ~bg1~ => ~rasaad rasaad2 rasaad4 rasaad6~
+  ~rasaad~,    ~sod~ => ~rasaad7~
+  ~rasaad~,    ~bg2~ => ~rasaad8 rasaad9 rasaad10 rasaad11 rasaad13 rasaad12~
+  ~safana~,    ~bg1~ => ~safana safana4 safana6~
+  ~safana~,    ~sod~ => ~safana7~
+  ~sarevok~,   ~bg2~ => ~sarevok~
+  ~sharteel~,  ~bg1~ => ~sharte sharte4 sharte6~
+  ~skie~,      ~bg1~ => ~skie skie6~
+  ~tiax~,      ~bg1~ => ~tiax tiax4 tiax6~
+  ~valygar~,   ~bg2~ => ~valyg8 valyg9 valyg11 valyg12 valyg14~
+  ~viconia~,   ~bg1~ => ~viconi viconi4 viconi6~
+  ~viconia~,   ~sod~ => ~viconi7~
+  ~viconia~,   ~bg2~ => ~viconi6 viconi8 viconi9 viconi11 viconi13 viconi16~
+  ~voghiln~,   ~sod~ => ~voghil7~
+  ~xan~,       ~bg1~ => ~xan xan4 xan6~
+  ~xzar~,      ~bg1~ => ~xzar xzar2 xzar4 xzar6~
+  ~yeslick~,   ~bg1~ => ~yeslic yeslic5~
+  ~yoshimo~,   ~bg2~ => ~yoshi7 yoshi8 yoshi10 yoshi11 yoshi12~
+  ~wilson~,    ~bg2~ => ~wilson9 wilson13~
+END
+
+// The dialogues and scripts with a JoinParty() of a joinable, per game.
+//
+// c5_joins has the first join: the NPC's own dialogue, the ToB meeting
+// (25a), the cutscene scripts.
+ACTION_DEFINE_ASSOCIATIVE_ARRAY c5_joins BEGIN
+  ~bg1~ => ~ajanti.dlg alora.dlg baeloth.dlg branwe.dlg coran.dlg dorn.dlg
+           dynahe.dlg edwin.dlg edwinj.dlg eldoth.dlg faldor.dlg garric.dlg
+           imoen2.dlg jaheir.dlg kagain.dlg kivan.dlg minsc.dlg montar.dlg
+           neera.dlg quayle.dlg rasaad.dlg safana.dlg sharte.dlg skie.dlg
+           tiax.dlg viconi.dlg xan.dlg xzar.dlg yeslic.dlg~
+
+  ~sod~ => ~bdajanti.dlg bdalora.dlg bdbaelot.dlg bdbranwe.dlg bdcoran.dlg
+           bdcorwin.dlg bddorn.dlg bddynahe.dlg bdedwin.dlg bdeldoth.dlg
+           bdfaldor.dlg bdgarric.dlg bdglint.dlg bdimoen.dlg bdjaheir.dlg
+           bdkagain.dlg bdkhalid.dlg bdkhalij.dlg bdkivan.dlg bdminsc.dlg
+           bdminscj.dlg bdmkhiin.dlg bdmontar.dlg bdneera.dlg bdquayle.dlg
+           bdrasaad.dlg bdsafana.dlg bdsharte.dlg bdskie.dlg bdtiax.dlg
+           bdviconi.dlg bdvoghil.dlg bdvoghij.dlg bdxan.dlg bdxzar.dlg
+           khalij.dlg minscj.dlg bdcut64x.bcs bdintro.bcs~
+
+  ~bg2~ => ~aerie.dlg aerie25a.dlg anomen.dlg anome25a.dlg cernd.dlg
+           cernd25a.dlg dorn.dlg dorn25a.dlg edwin.dlg edwin25a.dlg
+           haerda.dlg haerd25a.dlg hexxat.dlg hexxa25a.dlg imoen2.dlg
+           imoen10.dlg imoen25a.dlg jaheira.dlg jahei25a.dlg jan.dlg
+           jan25a.dlg keldor.dlg keldo25a.dlg korgana.dlg korga25a.dlg
+           mazzy.dlg mazzy25a.dlg minsca.dlg minsc25a.dlg nalia.dlg
+           nalia25a.dlg neera.dlg neera25a.dlg quayle.dlg rasaad.dlg
+           rasaa25a.dlg sarev25a.dlg valygar.dlg valyg25a.dlg viconi.dlg
+           vicon25a.dlg wilson.dlg yoshimo.dlg minsc.bcs~
+END
+
+// c5_rejoins has the dialogue after kick-out (p), the in-party dialogues (j)
+// and the scripts that bring a quest NPC back.
+// A SoD dialogue serves the first join and the rejoin alike, so the sod
+// rejoin list is empty.
+ACTION_DEFINE_ASSOCIATIVE_ARRAY c5_rejoins BEGIN
+  ~bg1~ => ~ajantp.dlg alorap.dlg baelothp.dlg branwp.dlg coranp.dlg
+           dornj.dlg dornp.dlg dynahj.dlg dynahp.dlg edwinp.dlg eldotp.dlg
+           faldop.dlg garrip.dlg imoenp.dlg jaheip.dlg kagaip.dlg khalip.dlg
+           kivanp.dlg minscp.dlg montap.dlg neerap.dlg quaylp.dlg
+           rasaadp.dlg safanp.dlg shartp.dlg skiep.dlg tiaxp.dlg viconp.dlg
+           xanp.dlg xzarp.dlg yeslip.dlg~
+  ~sod~ => ~~
+  ~bg2~ => ~aeriep.dlg aerie25p.dlg anomenj.dlg anomenp.dlg banomen.dlg
+           anome25p.dlg cerndp.dlg cernd25p.dlg dornp.dlg dorn25p.dlg
+           edwinp.dlg edwin25p.dlg haerdap.dlg haerd25p.dlg hexxatp.dlg
+           hexxa25p.dlg imoen2p.dlg imoen25p.dlg jaheirap.dlg jahei25p.dlg
+           janp.dlg jan25p.dlg keldorp.dlg keldo25p.dlg korganp.dlg
+           korga25p.dlg mazzyp.dlg mazzy25p.dlg minscp.dlg minsc25p.dlg
+           naliap.dlg nalia25p.dlg neeraj.dlg neerap.dlg neera25p.dlg
+           rasaadp.dlg rasaa25j.dlg rasaa25p.dlg sarev25j.dlg sarev25p.dlg
+           valygarp.dlg valyg25p.dlg viconip.dlg vicon25p.dlg wilsonp.dlg
+           yoshp.dlg ar0800.bcs cut11a.bcs hexxat.bcs hexxa25.bcs ohdano.bcs
+           ohdano2.bcs ohhaeri.bcs ohhaeri2.bcs ohhkeld.bcs ohhkeld2.bcs
+           ohhmaz.bcs ohhmaz2.bcs ohhval.bcs ohhval2.bcs~
+END
