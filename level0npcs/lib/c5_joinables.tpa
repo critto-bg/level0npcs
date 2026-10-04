@@ -84,9 +84,7 @@ END
 // The dialogues and scripts with a JoinParty() of a joinable, per game.
 //
 // c5_joins has the first join: the NPC's own dialogue, the ToB meeting
-// (25a), the cutscene scripts. A SoD in-party dialogue (bd*j) joins
-// another NPC. EET merges bdkhalij and bdminscj into khalij and minscj
-// and leaves them empty, so the sod list names those two as well.
+// (25a), the cutscene scripts.
 ACTION_DEFINE_ASSOCIATIVE_ARRAY c5_joins BEGIN
   ~bg1~ => ~ajanti.dlg alora.dlg baeloth.dlg branwe.dlg coran.dlg dorn.dlg
            dynahe.dlg edwin.dlg edwinj.dlg eldoth.dlg faldor.dlg garric.dlg
