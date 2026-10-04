@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/critto-bg/level0npcs/compare/v1.1.1...v1.2.0) (2026-10-04)
+
+
+### Features
+
+* match protagonist's XP on (re-)join ([#5](https://github.com/critto-bg/level0npcs/issues/5)) ([5dd4b82](https://github.com/critto-bg/level0npcs/commit/5dd4b820ef626c75fc87fa98a0ea54986b0caa09))
+
 ## [1.1.1](https://github.com/critto-bg/level0npcs/compare/v1.1.0...v1.1.1) (2026-09-27)
 
 
