@@ -76,17 +76,24 @@ The quantity of existing mods and their permutations is too high for me to be ab
 
 ## Compatible mods
 
+The following mods are definitively confirmed to be compatible:
+
+- [Improved Anvil](https://github.com/critto-bg/improvedanvil)
+- [Improved Archer Kit](https://github.com/Argent77/A7-ImprovedArcher)
+- [Multiclass Kits](https://github.com/Argent77/A7-MultiKits)
+- [Morpheus562's Kitpack](https://www.morpheus-mart.com/morpheus562s-kitpack)
+
 Mods with their own take on the joinable characters that Level 0 NPCs knows about. Install them before Level 0 NPCs. The characters you don't re-spec keep the other mod's treatment.
 
 ### Improved Anvil
 
-[Improved Anvil](https://github.com/critto-bg/improvedanvil) gives each joinable character experience points when they join, so that they keep up with the protagonist. For a character you re-spec, Level 0 NPCs removes this mechanism and uses its own instead. Otherwise the experience points would arrive before the character's first level-up and skip the proficiency choices of that level. With the XP match on join component, the same applies to every joinable character.
+Improved Anvil gives each joinable character experience points when they join, so that they keep up with the protagonist. For a character you re-spec, Level 0 NPCs removes this mechanism and uses its own instead. Otherwise the experience points would arrive before the character's first level-up and skip the proficiency choices of that level. With the XP match on join component, the same applies to every joinable character.
 
 Improved Anvil's smiths forge upgraded versions of the personal items. For a character you re-spec, those follow the personal items: any class and kit can use them, and they stay locked to their owner. The alignment and ability score requirements Improved Anvil puts on some of them remain untouched.
 
 ### Morpheus562's Kitpack
 
-[Morpheus562's Kitpack](https://www.morpheus-mart.com/morpheus562s-kitpack) adds kits, and Level 0 NPCs offers each of them. The only exception are the two prestige kits, Deathbringer and Archmage, which are not offered. The mods grants them in game to the protagonist alone, at level 15 and level 18, and Level 0 NPCs respects the author's intent.
+Morpheus562's Kitpack adds kits, and Level 0 NPCs offers each of them. The only exception are the two prestige kits, Deathbringer and Archmage, which are not offered. The mods grants them in game to the protagonist alone, at level 15 and level 18, and Level 0 NPCs respects the author's intent.
 
 ## Game quirks
 
