@@ -83,7 +83,7 @@ The following mods are definitively confirmed to be compatible:
 - [Multiclass Kits](https://github.com/Argent77/A7-MultiKits)
 - [Morpheus562's Kitpack](https://www.morpheus-mart.com/morpheus562s-kitpack)
 
-Mods with their own take on the joinable characters that Level 0 NPCs knows about. Install them before Level 0 NPCs. The characters you don't re-spec keep the other mod's treatment.
+Some mods have their own take on the joinable characters that Level 0 NPCs knows about. Install them before Level 0 NPCs. The characters you don't re-spec keep the other mod's treatment.
 
 ### Improved Anvil
 
