@@ -82,6 +82,7 @@ The following mods are definitively confirmed to be compatible:
 - [Improved Archer Kit](https://github.com/Argent77/A7-ImprovedArcher)
 - [Multiclass Kits](https://github.com/Argent77/A7-MultiKits)
 - [Morpheus562's Kitpack](https://www.morpheus-mart.com/morpheus562s-kitpack)
+- [Tactics Remix](https://www.morpheus-mart.com/tactics-remix)
 
 Some mods have their own take on the joinable characters that Level 0 NPCs knows about. Install them before Level 0 NPCs. The characters you don't re-spec keep the other mod's treatment.
 
@@ -94,6 +95,10 @@ Improved Anvil's smiths forge upgraded versions of the personal items. For a cha
 ### Morpheus562's Kitpack
 
 Morpheus562's Kitpack adds kits, and Level 0 NPCs offers each of them. The only exception are the two prestige kits, Deathbringer and Archmage, which are not offered. The mods grants them in game to the protagonist alone, at level 15 and level 18, and Level 0 NPCs respects the author's intent.
+
+### Tactics Remix
+
+The component "Characters will be knocked unconscious when reduced to 0hp" knocks out any party member who stands at exactly 1 HP. A character you re-spec joins with 1 HP, so they would drop unconscious on the spot, wake up and drop again until their first level-up. Level 0 NPCs adds an extra condition that prevents level 0 characters from being affected. Install Tactics Remix before Level 0 NPCs.
 
 ## Game quirks
 

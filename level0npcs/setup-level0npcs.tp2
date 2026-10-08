@@ -39,6 +39,7 @@ DESIGNATED 0
 REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @10
 
 LAF c5_install_xp END
+LAF c5_mods_shared END
 
 // Aerie //
 

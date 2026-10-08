@@ -20,6 +20,16 @@ BEGIN
 END
 
 //
+// Runs the once-per-install work of every supported mod that is
+// installed.
+//
+DEFINE_ACTION_FUNCTION c5_mods_shared BEGIN
+  ACTION_IF MOD_IS_INSTALLED ~tactics-remix/tactics-remix.tp2~ 99 BEGIN
+    LAF c5_mods_tacticsremix END
+  END
+END
+
+//
 // Turns off the join XP of every supported mod that is installed for
 // an NPC.
 //
@@ -150,6 +160,30 @@ BEGIN
           COMPILE_D_TO_DLG
         BUT_ONLY
       END
+    END
+  END
+END
+
+//
+// Tactics Remix, "Characters will be knocked unconscious when reduced
+// to 0hp" (component 99): the blocks it puts on top of the global
+// scripts knock out a party member at exactly 1 HP. LevelGT(PlayerN,0)
+// goes beside each HP(PlayerN,1) of those blocks.
+//
+DEFINE_ACTION_FUNCTION c5_mods_tacticsremix BEGIN
+  ACTION_FOR_EACH script IN baldur bdbaldur baldur25 BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~%script%.bcs~ BEGIN
+      COPY_EXISTING ~%script%.bcs~ ~override~
+        DECOMPILE_AND_PATCH BEGIN
+          PATCH_IF (INDEX_BUFFER (~MO_UNCONSCIOUS~) >= 0) BEGIN
+            FOR (i = 1; i <= 6; i += 1) BEGIN
+              REPLACE_TEXTUALLY
+                ~HP(Player%i%,1)\([ %TAB%%LNL%%WNL%]+\)!CheckSpellState(Player%i%,MO_UNCONSCIOUS)~
+                ~HP(Player%i%,1)\1LevelGT(Player%i%,0)\1!CheckSpellState(Player%i%,MO_UNCONSCIOUS)~
+            END
+          END
+        END
+      BUT_ONLY
     END
   END
 END
