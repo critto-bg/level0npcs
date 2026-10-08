@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/critto-bg/level0npcs/compare/v1.2.0...v1.2.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* add compatibility with 'unconscious before death' component of tactics remix ([8cdaf3c](https://github.com/critto-bg/level0npcs/commit/8cdaf3cb34ab31c8d7cb47886f6cd5d12c7607a0))
+
 ## [1.2.0](https://github.com/critto-bg/level0npcs/compare/v1.1.1...v1.2.0) (2026-10-04)
 
 
